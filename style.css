@@ -1,5 +1,6 @@
 html {
-    background-color: black;
+	background-color: black;
+	overflow: hidden;
 }
 
 #mainCanvas {
@@ -7,14 +8,5 @@ html {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    background-color: white;
-    width: 90vw;
-    height: calc(90vw / 16 * 9);
-}
-
-@media (min-aspect-ratio:16/9) {
-    #mainCanvas {
-        height: 90vh;
-        width: calc(90vh / 9 * 16);
-    }
+	background-color: white;
 }
