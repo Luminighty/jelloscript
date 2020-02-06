@@ -1,0 +1,23 @@
+Planned:
+	☐ Mobile support @high 
+		✔ Render buttons @done (2019. 10. 27. 20:04:48)
+		✔ Render Axes @done (2019. 10. 27. 20:04:49)
+		✔ Get onPressed, and Axes value @done (2019. 10. 27. 20:04:50)
+		☐ Rotate screen
+		☐ fullscreen
+	☐ Animation @low 
+		☐ Animator Behaviour
+			☐ Tree nodes, and animation
+		☐ Animation keyframes
+			☐ Function that calculates their positions based on [frame, value]
+	✔ OnAnykey @high @done (2019. 10. 23. 12:23:33)
+		✔ Promise, then @done (2019. 10. 23. 12:15:36)
+	✔ Camera @done (2019. 10. 23. 12:39:30)
+	✔ Mouse @done (2019. 10. 26. 17:39:19)
+	☐ Particles @low 
+	☐ Rigidbody
+	☐ UI
+		☐ HTML like?
+	☐ Networking @low 
+		☐ Multiplayer 
+		☐ Online storage
