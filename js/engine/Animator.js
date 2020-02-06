@@ -11,9 +11,15 @@ export default class Animator extends Component {
 	 */
 	constructor(gameObject, sprite, spriteRect) {
 		super(gameObject);
-		/** @type Sprite */
+		/** 
+		 * The sprite to be rendered (hides gameobject's sprite)
+		 * @type {Sprite} 
+		 * */
 		this.sprite = sprite;
-		/** @type Rect */
+		/** 
+		 * The spriteRect for rendering (hides gameobject.spriteRect)
+		 * @type {Rect}
+		 *  */
 		this.spriteRect = spriteRect;
 		/** @type {Number} */
 		this.tick = 0;
@@ -28,7 +34,7 @@ export default class Animator extends Component {
 	 * @param {Number[]} frames
 	 * @param {Any[]} values
 	 * @param {Number} startTick The offset for the frame
-	 * @param {Animator.PROGRESSIONS} progression
+	 * @param {Animator.PROGRESSIONS} progression The progression function used to calculate the value based on the last value, next value and percentage
 	*/
 	getKeyFrameValue(frames, values, startTick, progression) {
 		const frame = (this.tick - startTick) % frames[frames.length-1];
@@ -42,9 +48,6 @@ export default class Animator extends Component {
 			const newKeyFrame = frames[i];
 			
 			const framePercentage = frame / newKeyFrame;
-			//console.log(`${frames[i]}!! ${framePercentage}: ${frame} - ${lastKeyFrame} / ${newKeyFrame}`);
-			
-			console.log(newKeyFrame);
 						
 			return progression(lastValue, newValue, framePercentage);
 		}
@@ -53,8 +56,8 @@ export default class Animator extends Component {
 }
 
 Animator.PROGRESSIONS = {
-	linear: function (lastValue, newValue, percentage) {
-		const delta = newValue - lastValue;
+	linear: function (lastValue, nextValue, percentage) {
+		const delta = nextValue - lastValue;
 		return lastValue + (delta * percentage);
 	}
 };

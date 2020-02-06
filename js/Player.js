@@ -12,8 +12,6 @@ import Camera from './engine/Camera';
 class PlayerAnimator extends Animator {
 	constructor(gameObject) {
 		super(gameObject, sprites.player, sprites.player.getSpriteRect(0,0));
-
-
 	}
 
 	animate() {
@@ -24,13 +22,14 @@ class PlayerAnimator extends Animator {
 		} else {
 			this.spriteRect = sprites.player.getSpriteRect(0,0);
 		}
-		const positionX =   this.getKeyFrameValue(
+		/*
+		const positionX = this.getKeyFrameValue(
 							[0,  30,  70, 150, 200],
-							[0, 5, -2,   0,   0],
+							[0,   5,  -2,   0,   0],
 							0, Animator.PROGRESSIONS.linear
 						);
-		//this.gameObject.localPosition = new Vector2(positionX, this.gameObject.localPosition.y);
-		
+		this.gameObject.localPosition = new Vector2(positionX, this.gameObject.localPosition.y);
+		*/
 	}
 
 	get isMoving() {

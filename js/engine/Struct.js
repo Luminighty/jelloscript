@@ -23,12 +23,16 @@ export class Vector2 {
 
 	/**
 	 * @param {Number} index 
-	 * @returns (index mod 2 == 0) ? x : y
+	 * @returns {Number} (index mod 2 == 0) ? x : y
 	 */
 	get(index) {
 		index %= 2;
 		return (index == 0) ? this.x : this.y;
 	}
+	/**
+	 * Clones the vector
+	 * @returns {Vector2} clone
+	 */
 	clone() {
 		return new Vector2(this.x, this.y);
 	}
@@ -36,17 +40,18 @@ export class Vector2 {
 	/**
 	 * Adds two Vectors together
 	 * @param {Vector2} other The other vector to add from the original
-	 * @returns The vectors coordinates added together 
+	 * @returns {Vector2} a NEW vector2
 	 */
 	add(other) { return new Vector2(this.x + other.x, this.y + other.y); }
 	/**
-	 * Substracts two Vectors together
+	 * Substracts two Vectors together (this - other)
 	 * @param {Vector2} other The other vector to substract from the original
-	 * @returns The vectors coordinates substracted  
+	 * @returns {Vector2} a NEW vector2
 	 */
 	substract(other) { return this.add(new Vector2(other).negate()); }
 	/**
 	 * Returns the negate of this vector (-this.x, -this.y)
+	 * @returns {Vector2} a NEW vector2
 	 */
 	negate() { return new Vector2(-this.x, -this.y); }
 	/**
@@ -65,46 +70,63 @@ export class Vector2 {
 	 * @returns {Vector2} a NEW vector2
 	 */
 	round() {return new Vector2(Math.round(this.x), Math.round(this.y)); }
+
 	/**
 	 * Floors the components of the vector
 	 * @returns {Vector2} a NEW vector2
 	 */
 	floor() {return new Vector2(Math.floor(this.x), Math.floor(this.y)); }
 
-	/** The magnitude of this vector */
+	/** The magnitude of this vector
+	 * @returns {Number} magnitude
+	 */
 	get magnitude() { return Math.sqrt(this.sqrMagnitude);}
-	/** The magnitude of this vector squared (Faster than magnitude)  */
+	/** The magnitude of this vector squared (Faster than magnitude, because doesn't use square root)
+	 * @returns {Number} magnitude
+	  */
 	get sqrMagnitude() { return this.x * this.x + this.y * this.y; }
-	/** Returns this vector with a magnitude of 1  */
+	/** Returns this vector with a magnitude of 1
+	 * @returns {Vector2}
+	  */
 	get normalized() { const magnitude = this.magnitude; return (magnitude > 0) ? this.divide(magnitude) : Vector2.zero;}
 
+
 	/**
-	 * @returns The dot product of the 2 vectors: (a.x * b.x) + (a.y * b.y) 
+	 * Calculates the dot product of two vectors: (a.x * b.x) + (a.y * b.y) 
 	 * @param {Vector2} a 
 	 * @param {Vector2} b 
+	 * @returns {Number} dot product
 	 */
 	static dot(a, b) {return a.x * b.x + a.y * b.y;}
 	/**
-	 * @returns The angle between the 2 vectors
+	 * Calculates the angle between two vectors
 	 * @param {Vector2} a 
 	 * @param {Vector2} b 
+	 * @returns {Number} angle in radians
 	 */
 	static angle(a, b) {
 		const m = a.magnitude * b.magnitude;
 		return (m != 0) ? Math.acos(Vector2.dot(a,b) / m) : 0;
 	}
 
-	/** shorthand for new Vector(0,0) */
+	/** 
+	 * Shorthand for new Vector(0,0)
+	 * @returns {Vector2}  */
 	static get zero()  { return new Vector2( 0, 0); }
-	/** shorthand for new Vector(1,1) */
+	/** Shorthand for new Vector(1,1)
+	 * @returns {Vector2}  */
 	static get one()   { return new Vector2( 1, 1); }
-	/** shorthand for new Vector(1,0) */
+	/** Shorthand for new Vector(1,0) 
+	 * @returns {Vector2}  */
 	static get right() { return new Vector2( 1, 0); }
-	/** shorthand for new Vector(-1,0) */
+	/** Shorthand for new Vector(-1,0) 
+	 * @returns {Vector2}  */
 	static get left()  { return new Vector2(-1, 0); }
-	/** shorthand for new Vector(0,1) */
+	/** Shorthand for new Vector(0,1) 
+	 * @returns {Vector2}  */
 	static get up()    { return new Vector2( 0, 1); }
-	/** shorthand for new Vector(0,-1) */
+	/** Shorthand for new Vector(0,-1) 
+	 * @returns {Vector2}  */
 	static get down()  { return new Vector2( 0,-1); }
 
 	/**
@@ -123,6 +145,11 @@ export class Vector2 {
 		return current.add(delta.divide(distance));
 	}
 	
+	/**
+	 * Checks whenever two vector are equal
+	 * @param {Rect} other 
+	 * @returns {Boolean}
+	 */
 	equals(other) {
 		other = new Vector2(other);
 		return other != null && other.x == this.x && other.y == this.y;
@@ -133,6 +160,9 @@ export class Vector2 {
 
 
 /**
+ * A box represented with 4 numbers. 
+ *    x and y for the top left coordinates
+ *    w and h for width and height
  * @public
  * @class
  */
@@ -158,7 +188,8 @@ export class Rect {
 	}
 
 	/**
-	 * @returns {Vector2} A vector for the position of the rect
+	 * The position of the rect {x, y}
+	 * @type {Vector2}
 	 */
 	get position() { return new Vector2(this.x, this.y); }
 	/**
@@ -167,7 +198,8 @@ export class Rect {
 	 */
 	set position(position) { position = new Vector2(position); this.x = position.x; this.y = position.y; }
 	/**
-	 * @returns {Vector2} A vector for the size of the rect
+	 * The size of the rect {w, h}
+	 * @type {Vector2}
 	 */
 	get size() { return new Vector2(this.w, this.h); }
 	/**
@@ -176,24 +208,42 @@ export class Rect {
 	 */
 	set size(size) { size = new Vector2(size); this.w = size.x; this.h = size.y; }
 
-	/** The smaller value on the X axis */
+	/** The smaller value on the X axis
+	 * @type {Number}
+	 */
 	get minX() {return this.x;}
-	/** The smaller value on the Y axis */
+	/** The smaller value on the Y axis
+	 * @type {Number}
+	 */
 	get minY() {return this.y;}
-	/** The larger value on the X axis */
+	/** The larger value on the X axis
+	 * @type {Number}
+	 */
 	get maxX() {return this.x + this.w;}
-	/** The larger value on the Y axis */
+	/** The larger value on the Y axis
+	 * @type {Number}
+	 */
 	get maxY() {return this.y + this.h;}
 
-	/** Top Left position in Vector2 */
+	/** Top Left position in Vector2
+	 * @type {Vector2}
+	 */
 	get topLeft() {return new Vector2(this.minX, this.minY);}
-	/** Top Right position in Vector2 */
+	/** Top Right position in Vector2
+	 * @type {Vector2}
+	 */
 	get topRight() {return new Vector2(this.maxX, this.minY);}
-	/** Bottom Left position in Vector2 */
+	/** Bottom Left position in Vector2
+	 * @type {Vector2}
+	 */
 	get bottomLeft() {return new Vector2(this.minX, this.maxY);}
-	/** Bottom Right position in Vector2 */
+	/** Bottom Right position in Vector2
+	 * @type {Vector2}
+	 */
 	get bottomRight() {return new Vector2(this.maxX, this.maxY);}
-	/** The center of the rect in Vector2 */
+	/** The center of the rect in Vector2
+	 * @type {Vector2}
+	 */
 	get center() { return new Vector2(this.minX + this.w/2, this.minY + this.h/2); }
 
 	/**
@@ -210,7 +260,7 @@ export class Rect {
 	 * Multiplies the rect with the number using type
 	 * @param {Number} number Number to multiply with
 	 * @param {Rect.MULTIPLY_TYPE} type Multiplication type
-	 * @returns {Rect }A NEW rect
+	 * @returns {Rect} a NEW rect
 	 */
 	multiply(number, type) {
 		let p = this.position;
@@ -225,7 +275,8 @@ export class Rect {
 	/**
 	 * Returns true if the rect contains the 'other' rect
 	 * A rect contains the other one if the other one does not have any points outside the rect
-	 * @param {Rect} other 
+	 * @param {Rect} other
+	 * @returns {Boolean}
 	 */
 	contains(other) {
 		const offset = {x:other.x-this.x, y:other.y-this.y};
@@ -238,6 +289,7 @@ export class Rect {
 	 * Returns true if the rect intersects the 'other' rect
 	 * Two rects intersects eachother if they have shared points
 	 * @param {Rect} other 
+	 * @returns {Boolean}
 	 */
 	intersects(other) {
 		return !(this.minX > other.maxX ||
@@ -252,17 +304,25 @@ export class Rect {
 	 * @param {Number} y1 
 	 * @param {Number} x2 
 	 * @param {Number} y2 
+	 * @returns {Rect}
 	 */
-	static initFromPositions(x1,y1,x2,y2) {
+	static initFromPositions(x1, y1, x2, y2) {
 		const x = Math.min(x1, x2);
 		const y = Math.min(y1, y2);
 		const w = Math.abs(x1 - x2);
 		const h = Math.abs(y1 - y2);
 		return new Rect(x,y,w,h);
 	}
-	/** Shorthand for new Rect(0,0,0,0) */
+	/** Shorthand for new Rect(0,0,0,0)
+	 * @returns {Rect}
+	 */
 	static get zero() {return new Rect(0,0,0,0);}
 
+	/**
+	 * Checks whenever two rects are equal
+	 * @param {Rect} other 
+	 * @returns {Boolean}
+	 */
 	equals(other) {
 		other = new Rect(other);
 		return other != null && other.x == this.x && other.y == this.y && other.w == this.w && other.h == this.h;

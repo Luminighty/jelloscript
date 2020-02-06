@@ -10,7 +10,6 @@ export default class Sprite extends Resource {
      * @param {Array} pivot [PivotX, PivotY] 
      * @param {dictionary} labels {"LABELNAME" : {x: OffsetX, y: OffsetY}, ...}
      * Offset as tiles, NOT PIXELS
-     * @returns Sprite
      */
     constructor(path, size, offset=[0,0], pivot=[0.5,0.5], labels={}) {
         super(path, "img");
@@ -18,22 +17,22 @@ export default class Sprite extends Resource {
         this.path = path;
 		/** 
 		 * @public
-		 * @type Vector2
+		 * @type {Vector2}
 		 */
         this.size = new Vector2(size);
 		/** 
 		 * @public
-		 * @type Vector2
+		 * @type {Vector2}
 		 */
 		this.offset = new Vector2(offset);
 		/**
 		 * @public
-		 * @type Vector2
+		 * @type {Vector2}
 		 */
 		this.pivot = new Vector2(pivot);
 		/** 
 		 * @public
-		 * @type SpriteLabel
+		 * @type {SpriteLabel}
 		 */
 		this.labels = labels;
 		/** @private */
@@ -69,12 +68,11 @@ export default class Sprite extends Resource {
         return this.getSpriteRect(l.x+offsetX, l.y+offsetY);
     }
 
-    /** @type HTMLImageElement */
+    /** @type {HTMLImageElement} */
     get element() {return super.element; }
 
     load() {
         super.load();
-        //this.element.style.scale = 10;
     }
 }
 

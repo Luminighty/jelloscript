@@ -1,4 +1,3 @@
-import Main from "../Main";
 import { canvasConfig } from '../Config';
 import * as InputManager from './InputManager';
 import { Vector2 } from './Struct';
@@ -10,8 +9,14 @@ function $(query) {return document.querySelector(query);}
 function $$(query) {return document.querySelectorAll(query);}
 
 /** @type HTMLCanvasElement */
-const canvasElement = $("#mainCanvas");
-const main = (function() {
+const canvasElement = $(canvasConfig.canvasQuery);
+
+/**
+ * Starts the game
+ * @param {Function} onStart Code to run when the game got initialized
+ * @returns {number} The ID used for clearInterval()
+ */
+export function main(onStart) {
 	const canvas = canvasElement.getContext("2d");
 	canvasElement.height = canvasConfig.size.y;
 	canvasElement.width = canvasConfig.size.x;
@@ -25,7 +30,9 @@ const main = (function() {
 
 	let tick = 0;
 	canvas.save();
-	Main();
+
+	onStart();
+
 	return setInterval(() => {
 		Update(tick);
 		canvas.clearRect(0,0,canvasConfig.size.x, canvasConfig.size.y);
@@ -34,8 +41,7 @@ const main = (function() {
 		InputManager.update();
 		tick++;
 	}, 1000/60);
-} ());
-window.main = main;
+}
 
 function Update(tick) {
 	for (let layer of gameObjects)

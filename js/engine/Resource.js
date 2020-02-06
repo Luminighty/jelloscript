@@ -17,7 +17,7 @@ export default class Resource {
     /** 
      * Returns the HTML element
      * @public
-	 * @type HTMLElement
+	 * @type {HTMLElement}
 	 */
     get element() {
         if (this._element == null) this.load();

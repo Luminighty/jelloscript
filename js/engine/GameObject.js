@@ -24,7 +24,7 @@ export default class GameObject extends Component {
 	/** @public */
 	constructor(size = new Vector2(1,1), enabled = true, hidden = false) {
 		super(null, enabled);
-		/** @type Vector2 */
+		/** @type {Vector2} */
 		this._size = size;
 		/** @type GameObject */
 		this.parent = null;
@@ -32,7 +32,7 @@ export default class GameObject extends Component {
 		this.components = [];
 		/**
 		 * @public
-		 * @type Vector2
+		 * @type {Vector2}
 		 */
 		this._localPosition = new Vector2(0,0);
 		/** @private */
@@ -64,6 +64,7 @@ export default class GameObject extends Component {
 		this.spriteAlpha = 1.0;
 		this.gameObject = this;
 	}
+
 	/** Adds a new component to the component array
 	 * @returns {Component} the new component
 	 */
@@ -112,7 +113,11 @@ export default class GameObject extends Component {
 		return outs;
 	}
 
-	/** USE UPDATE INSTEAD */
+	/** 
+	 * Calls update() on gameobject and on it's components
+	 * Do not override, unless you know what you're doing
+	 * @private
+	 */
 	tick(tick) {
 		this.update(tick);
 		for (const component of this.components)
@@ -121,7 +126,7 @@ export default class GameObject extends Component {
 
 	/**
 	 * @public
-	 * @type Vector2
+	 * @type {Vector2}
 	 */
 	get position() {
 		if(this.parent == null)
@@ -143,31 +148,42 @@ export default class GameObject extends Component {
 			return;
 		}
 		
+
+		/**
+		 * tries to move the gameobject by deltaX and deltaY
+		 * @param {GameObject} obj this
+		 * @param {number} deltaX 
+		 * @param {number} deltaY 
+		 */
+		const collisionCheck = function(obj, deltaX, deltaY) {
+			const lastPosition = obj.localPosition;
+			obj.localPosition = obj.localPosition.add({x: deltaX, y: deltaY});
+			
+			for (const col of obj._colliders)
+				if(col.collisionCheckMethod == COLLISION_CHECK_METHOD.ON_MOVED && col.updateCollision()) {
+					obj.localPosition = lastPosition;
+					return;
+				}
+		};
+
 		const iterCount = Config.collisionIterations;
 		const deltaStep = delta.divide(iterCount);
 		for (let step = 0; step < iterCount; step++) {
-			const lastPosition = this.localPosition;
-			this.localPosition = this.localPosition.add(deltaStep);
-			let collide = false;
-
-			for (const col of this._colliders)
-				if(col.collisionCheckMethod == COLLISION_CHECK_METHOD.ON_MOVED)
-					collide = collide || col.updateCollision();
-			
-			if (collide) {
-				this.localPosition = lastPosition;
-				return;
-			}
+			collisionCheck(this, deltaStep.x, 0);
+			collisionCheck(this, 0, deltaStep.y);
 		}
 	}
-	/** @type Vector2 */
+	
+
+	/** @type {Vector2} */
 	get localPosition() {return this._localPosition.clone(); }
-	set localPosition(value) {this._localPosition = value.clone(); }
+	set localPosition(value) { this._localPosition = new Vector2(value); }
 
-	/** @type Vector2 */
+	/** @type {Vector2} */
 	get size() { return this._size.clone(); }
-	set size(value) { this._size = value.clone(); }
+	set size(value) { this._size = new Vector2(value); }
 
+	/** @type {Boolean} */
 	get enabled() { return super.enabled;}
 
 	/** @public */

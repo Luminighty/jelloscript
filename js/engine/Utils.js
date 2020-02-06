@@ -1,7 +1,7 @@
 import { Vector2 } from "./Struct";
 
 /**
- * A random function where the chances can be set
+ * A random selection based on the chances array.
  * @param {[Number]} chances The chances of one of them being the outcome [10,30,20]
  * @param {[Any]} options The results of the chances, by default it's 0..chances.length-1
  * @returns {Any} An element of options or an index of chances
@@ -33,8 +33,9 @@ export function moveTowards(current, target, maxDelta) {
 		return moveTowardsInt(current, target, maxDelta);
 	if (current instanceof Vector2)
 		return Vector2.moveTowards(current, target, maxDelta);
-	
+	throw new TypeError(`Unsupported parameter types! (${typeof current}, ${typeof target})`);
 }
+
 
 function moveTowardsInt(value, to, stepSize) {
 	let dif = to - value;
@@ -46,16 +47,19 @@ function moveTowardsInt(value, to, stepSize) {
 
 
 /**
- * @returns The angle in degrees
+ * Converts the angle from radian to degree
  * @param {Number} angle An angle in radians
+ * @returns {Number} The angle in degrees
  */
 export function toDegree(angle) {
 	return angle * (180 / Math.PI);
 }
 
+
 /**
- * @returns The angle in radians
+ * Converts the angle from degree to radian
  * @param {Number} angle An angle in degrees
+ * @returns {Number} The angle in radians
  */
 export function toRadian(angle) {
 	return angle * (Math.PI / 180);

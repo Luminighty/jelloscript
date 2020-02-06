@@ -96,7 +96,7 @@ export default class Collider extends Component {
 			if (other.gameObject.equals(this.gameObject))
 				continue;
 			const contains = this.collisions.includes(other);
-			if(this.collides(other)) {
+			if(this.canCollide(other) && this.collides(other)) {
 				collide = true;
 				if (!contains) {
 					this._onCollisionStart(other);

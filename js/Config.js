@@ -3,6 +3,8 @@
   				  CANVAS
    ------------------------------------- */
 export const canvasConfig = {
+	/** The query used for finding the canvas */
+	canvasQuery: "#mainCanvas",
 	/** Canvas size in pixels */
 	size: {x: 320, y: 180},
 	/** Canvas ratio */

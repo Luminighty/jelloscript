@@ -26,8 +26,6 @@ export default class BoxCollider extends Collider {
 	 * @param {Collider} other 
 	 */
 	collides(other) {
-		if(!this.canCollide(other))
-			return false;
 		if (other instanceof BoxCollider)
 			return BoxCollider.intersects(this.bounds, other.bounds);
 		return false;
