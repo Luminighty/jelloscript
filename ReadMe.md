@@ -1,6 +1,6 @@
-# JS Game Engine
+# JelloScript Game Engine
 
-A hobby project, which started to grow and now needs a documentation, so it's easier to pick it up after some time of leaving it behind.
+Jelloscript started out as a hobby, but later became thesis project.
 
 # Sections
 - [Quick Start](./docs/Tutorial.md)
