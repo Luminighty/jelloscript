@@ -1,42 +1,72 @@
 import * as Utils from './Utils';
-import { axisConfig, Buttons, Axes, mouseConfig, TouchInputs } from "../Input";
+import { axisConfig, mouseConfig } from "../Input";
 import { Vector2 } from './Struct';
 import { canvasConfig } from '../Config';
+import { updateControllers, AxisKeys } from "./Controller";
 
-const inputMethods = { GAMEPAD: 0, KEYBOARD: 1, TOUCH: 2 };
-let currentInputMethod = inputMethods.KEYBOARD;
+/**
+ * @enum {number}
+ * @property {GAMEPAD} 0
+ * @property {KEYBOARD} 1
+ * @property {TOUCH} 2
+ */
+export const InputMethods = { 
+	/** @constant 0 */
+	GAMEPAD: 0,
+	/** @constant 1 */
+	KEYBOARD: 1, 
+	/** @constant 2 */
+	TOUCH: 2 
+};
+
+/** @typedef {Object} KeyboardControls
+ * @property {Object.<String, String>} Buttons
+ * @property {Object.<String, Object.<String, String>>} Axes
+ */
+
+/**
+ * @typedef {Object} PlayerControl
+ * @property {String} id
+ * @property {Inputs} inputs
+ * @property {InputMethods} type
+ */
+
+/**
+ * @typedef {Object} Inputs
+ * @property {Axes} Axes
+ * @property {Buttons} Buttons
+ */
 
 
 /**
  * @public
  * @class
+ * @abstract
  */
-export class Button {
-	
-	/**
-	 * Initializes a new Button input
-	 * @param {String} keyName Name of the key, should equals with the Buttons' index
-	 * @param {key.code} defaultKey Default keyboard control, see keyboardevent.code for the possible values
-	 * @param {Number} defaultButton Index for the button on a gamepad
-	 */
-	constructor(keyName, defaultKey, defaultButton) {
+class Input {
+	/** Initializes a new Input */
+	constructor() {
 		/**
-		 * The button's name
+		 * The current states for the Input
 		 * @private
 		 * @readonly
-		 */
-		this.key = keyName;
-		/**
-		 * The current state of the button
-		 * @private
-		 * @readonly
+		 * @type {Number}
 		 */
 		this.state = 0;
-		if (this instanceof Axis)
-			return;
-		keys.keyboard[keyName] = defaultKey;
-		keys.gamepad[keyName] = defaultButton;
 	}
+}
+
+/**
+ * @public
+ * @class
+ */
+export class Button extends Input {
+	
+	/** Initializes a new Button input */
+	constructor() {
+		super();
+	}
+
 	/** 
 	 * Returns true during the frame the user pressed the button
 	 * @public
@@ -57,167 +87,45 @@ export class Button {
 	get isUp() {return this.state < 0;}
 }
 
-export class Axis extends Button {
-	/**
-	 * Initializes a new Axis input
-	 * @param {String} axisName Name of the key, should equals with the Axes' index
-	 * @param {key.code} positiveKey Default positive key on the keyboard
-	 * @param {key.code} negativeKey Default negative key on the keyboard
-	 * @param {Number} gamepadAxis Index for the axis on a gamepad
-	 */
-	constructor(axisName, positiveKey, negativeKey, gamepadAxis) {
-		super(axisName, "", "");
-		this.axis = axisName;
-		this.toValue = 0;
+export class Axis extends Input {
 	
-		keys.keyboard[axisName + "+"] = positiveKey;
-		keys.keyboard[axisName + "-"] = negativeKey;
-		keyToAxis[positiveKey] = [axisName,  1];
-		keyToAxis[negativeKey] = [axisName, -1];
-		gamepadToAxis[axisName] = gamepadAxis;
+	/** Initializes a new Axis input*/
+	constructor() {
+		super();
+		/**
+		 * @private
+		 * @readonly
+		 * @type {Number}
+		 */
+		this.dead = 0.0;
+
+		/**
+		 * Used for keyboard values
+		 * @private
+		 * @readonly
+		 * @type {Number}
+		 */
+		this.toValue = 0;
 	}
+
 	/** 
 	 * Return the current value of the axis. A number between [-1,1]
 	 * @public
 	 * @type Number 
 	 */
-	get value() {return (Math.abs(this.state) > axisConfig[currentInputMethod].dead) ? this.state : 0;}
+	get value() {return (Math.abs(this.state) > this.dead) ? this.state : 0;}
 }
+
 
 /**
  * @private
  */
 export function update() {
 	Mouse.wheel = 0;
-	if (checkGamePadInputs())
-		currentInputMethod = inputMethods.GAMEPAD;
-	
-	for (const btnKey in Buttons) {
-		if (!Buttons.hasOwnProperty(btnKey))
-			continue;
-		const btn = Buttons[btnKey];
-		if (btn.state == 1 || btn.state == -1)
-			btn.state++;
-	}
-	
-	(currentInputMethod == inputMethods.KEYBOARD) ? updateAxisKeyboard() : updateAxisGamepad();
+	updateControllers();
 }
 
-function updateAxisKeyboard() {
-	for (const axisKey in Axes) {
-		if (!Axes.hasOwnProperty(axisKey))
-			continue;
-		const axis = Axes[axisKey];
-		if (axis.state * axis.toValue < 0)
-			axis.state = 0;
-		let multiplier = (axis.toValue == 0) ? axisConfig[currentInputMethod].gravity : axisConfig[currentInputMethod].sensivity;
-		axis.state = Utils.moveTowards(axis.state, axis.toValue, Math.abs(axis.state - axis.toValue) * multiplier);
-	}
-}
 
-function updateAxisGamepad() {
-	if(currentGamePad == null)
-		return;
-	
-	const gamepadButtons = keys.gamepad;
-	for (const btn in gamepadButtons) {
-		if (gamepadButtons.hasOwnProperty(btn)) {
-			const index = gamepadButtons[btn];
-			
-			if (currentGamePad.buttons[index].pressed && Buttons[btn].state == 0)
-				Buttons[btn].state = 1;
-			if (!currentGamePad.buttons[index].pressed && Buttons[btn].state == 2)
-				Buttons[btn].state = -1;
-
-		}
-	}
-
-	for (const axis in gamepadToAxis) {
-		if (gamepadToAxis.hasOwnProperty(axis)) {
-			const axisIndex = gamepadToAxis[axis];
-			const value = currentGamePad.axes[axisIndex];
-			if (Math.abs(value) > axis[1].dead)
-				currentInputMethod = inputMethods.GAMEPAD;
-
-			Axes[axis].state = value;
-		}
-	}
-	
-}
-
-function checkGamePadInputs() {
-	if (currentGamePad == null)
-		return false;
-	for (const gamePad of navigator.getGamepads()) {
-		if (gamePad == null)
-			continue;
-		
-		for (const value of currentGamePad.axes)
-			if(Math.abs(value) > axisConfig[inputMethods.GAMEPAD].dead) {
-				currentGamePad = gamePad;
-				return true;
-			}
-
-		for (const btn of currentGamePad.buttons) {
-			if(btn.pressed) {
-				currentGamePad = gamePad;
-				return true;
-			}
-		}
-	}
-	currentGamePad = navigator.getGamepads()[currentGamePad.index];
-	
-	return false;
-}
-
-window.addEventListener("keydown", (e) => {
-	updateKeyFromKeyboard(e.code, 1);
-});
-
-window.addEventListener("keyup", (e) => {
-	updateKeyFromKeyboard(e.code, -1);
-});
-
-let currentGamePad;
-window.addEventListener("gamepadconnected", (e) => {
-	if(currentGamePad == null)
-		currentGamePad = e.gamepad;
-});
-
-/*
-	Updates the buttons and axes when the user presses a button on the keyboard
-	keycode is the recieved input, while value is the new value the button will have
-
-	for axes if the value is -1 it's set to go towards 0, while if it's 1, then it'll recieve the
-	new value from keyToAxis
-*/
-function updateKeyFromKeyboard(keycode, value) {
-	currentInputMethod = inputMethods.KEYBOARD;
-	let keyboardKeys = keys.keyboard;
-	for (const key in keyboardKeys) {
-		if (!keyboardKeys.hasOwnProperty(key))
-			continue;
-		const element = keyboardKeys[key];	
-		if (element == keycode) {
-			if (Buttons[key] != null && (Buttons[key].state < 1 || value == -1)) {
-				Buttons[key].state = value;
-			}
-			
-			if (keyToAxis[element] != null) {
-				let axis = Axes[keyToAxis[element][0]];
-				
-				/*
-					Change the toValue if it recieved a new input
-					OR
-					on losing input and the current input is the same as the one we're losing
-				*/
-				if (value > 0 || axis.toValue * keyToAxis[element][1] > 0)
-					axis.toValue = (value > 0) ? keyToAxis[element][1] : 0;
-
-			}
-		}
-	}
-}
 
 /** @returns {Promise<KeyboardEvent.code>} */
 export function onAnyKeyboardKey() {
@@ -269,140 +177,85 @@ export function setGamepadKeyOnNextPress(key) {
 	});
 }
 
-export function setKeyboardKey(key, code) {
-	keys.keyboard[key] = code;
-}
-
-export function setGamepadKey(key, code) {
-	keys.gamepad[key] = code;
-}
-
-/**
- * The default control settings
- * 		'BUTTON': 'Default key'
- * 
- * keyboard uses KeyboardEvent.code
- * gamepad uses the gamepad button's index
- */
-let keys = {
-	keyboard: {},
-	gamepad: {}
-};
-
-/**
- * Converts a key to the corresponding axis
- * @returns [AxisName, +1/-1]
- */
-const keyToAxis = {};
 
 
-/** The axis index used when fetching gamepad's data */
-let gamepadToAxis = {};
 
-export const Mouse = {
-	position: Vector2.zero,
-	pressed: [],
-	isPressed: function(key) {
-		for (const btn of this.pressed)
-			if (btn == key)
-				return true;
-		return false;
-	},
-	wheel: 0
-};
 
-/** @type {HTMLCanvasElement} */
-const canvas = document.body.querySelector("canvas");
 
-window.addEventListener("mousemove", (e) => {
-	const rect = canvas.getBoundingClientRect();
-	const size = canvasConfig.size;
-	const scale = {x: rect.width / size.x, y: rect.height / size.y };
 
-	const newPosition = {x: (e.clientX - rect.x) / scale.x, y: (e.clientY - rect.y) / scale.y};
-	if (!mouseConfig.allowOutsideMousePosition && isOutsideOfCanvas(newPosition, rect))
+
+export const Mouse = (function() {
+	const Mouse = {
+		position: Vector2.zero,
+		/** @type {[Number]} */
+		pressed: [],
+		/** @param {Number} key */
+		isPressed: function(key) {
+			for (const btn of this.pressed)
+				if (btn == key)
+					return true;
+			return false;
+		},
+		wheel: 0
+	};
+
+
+	/** @type {HTMLCanvasElement} */
+	const canvas = document.body.querySelector(canvasConfig.canvasQuery);
+
+	window.addEventListener("mousemove", (e) => {
+		const rect = canvas.getBoundingClientRect();
+		const size = canvasConfig.size;
+		const scale = {x: rect.width / size.x, y: rect.height / size.y };
+
+		const newPosition = {x: (e.clientX - rect.x) / scale.x, y: (e.clientY - rect.y) / scale.y};
+		if (!mouseConfig.allowOutsideMousePosition && isOutsideOfCanvas(newPosition, rect))
+			return;
+		Mouse.position = new Vector2(newPosition.x, newPosition.y);
+	});
+
+	window.addEventListener("mousedown", (e) => {
+		Mouse.pressed.push(e.button);
+	});
+	window.addEventListener("mouseup", (e) => {
+		Mouse.pressed.splice(Mouse.pressed.indexOf(e.button), 1);
+	});
+	window.addEventListener("mousewheel", (e) => {
+		Mouse.wheel = e.deltaY;
+	});
+
+	/**
+	 * @param {Vector2} position 
+	 * @returns {Boolean}
+	 */
+	function isOutsideOfCanvas(position) {
+		return position.x < 0 || position.y < 0	|| position.x > canvasConfig.size.x || position.y > canvasConfig.size.y;
+	}
+
+	return Mouse;
+}());
+// ------ MOUSE END ------
+
+
+export {AxisKeys};
+
+let lastUsedController = null;
+export function lastUsed(controller) {
+	if (lastUsedController === controller)
 		return;
-	Mouse.position = new Vector2(newPosition.x, newPosition.y);
-});
 
-window.addEventListener("mousedown", (e) => {
-	Mouse.pressed.push(e.button);
-});
-window.addEventListener("mouseup", (e) => {
-	Mouse.pressed.splice(Mouse.pressed.indexOf(e.button), 1);
-});
+	lastUsedController = controller;
+	for (const key in controller.buttons) {
+		if (controller.buttons.hasOwnProperty(key)) {
+			const element = controller.buttons[key];
+			Buttons[key] = element;
+		}
+	}
 
-window.addEventListener("mousewheel", (e) => {
-	Mouse.wheel = e.deltaY;
-});
-
-/**
- * @param {Vector2} position 
- */
-function isOutsideOfCanvas(position) {
-	return position.x < 0 || position.y < 0	|| position.x > canvasConfig.size.x || position.y > canvasConfig.size.y;
-}
-
-
-/** @param {HTMLImageElement} element */
-function addAxisTouch(element, keys) {
-	const startPosition = new Vector2(0,0);
-	element.addEventListener("touchstart", (e) => {
-		e.preventDefault();
-		startPosition.x = e.targetTouches[0].clientX;
-		startPosition.y = e.targetTouches[0].clientY;
-		currentInputMethod = inputMethods.TOUCH;
-	});
-	element.addEventListener("touchmove", (e) => {
-		e.preventDefault();
-		const touch = e.targetTouches[0];
-		let delta = new Vector2(touch.clientX, touch.clientY).substract(startPosition).divide(axisConfig[inputMethods.TOUCH].radius);
-		if (delta.magnitude > 1)
-			delta = delta.normalized;
-		
-		/** @type {Axis} */
-		const horizontal = Axes[keys[0]];
-		/** @type {Axis} */
-		const vertical = Axes[keys[1]];
-		horizontal.state = delta.x;
-		vertical.state = delta.y;
-		currentInputMethod = inputMethods.TOUCH;
-	});
-	element.addEventListener("touchend", (e) => {
-		e.preventDefault();
-		/** @type {Axis} */
-		const horizontal = Axes[keys[0]];
-		/** @type {Axis} */
-		const vertical = Axes[keys[1]];
-		horizontal.state = 0;
-		vertical.state = 0;
-	});
-}
-/** @param {HTMLImageElement} element */
-function addButtonTouch(element, key) {
-	element.addEventListener("touchstart", (e) => {
-		e.preventDefault();
-		/** @type {Button} */
-		const btn = Buttons[key];
-		btn.state = 1;
-		currentInputMethod = inputMethods.TOUCH;
-	});
-	element.addEventListener("touchend", (e) => {
-		e.preventDefault();
-		const btn = Buttons[key];
-		btn.state = -1;
-	});
-}
-
-export function addTouchInputs() {
-	const listeners = {"axis": addAxisTouch, "button": addButtonTouch};
-	for (const touchInput of TouchInputs) {
-		/** @type {HTMLImageElement} */
-		const element = document.createElement("img");
-		element.src = touchInput.image;
-		element.style.cssText = touchInput.css;
-		document.body.appendChild(element);
-		const addListener = listeners[touchInput.type.toLowerCase()];
-		addListener(element, touchInput.key);
-	}	
+	for (const key in controller.axes) {
+		if (controller.axes.hasOwnProperty(key)) {
+			const element = controller.axes[key];
+			Axes[key] = element; 
+		}
+	}
 }
