@@ -19,7 +19,6 @@ const canvasElement = $(canvasConfig.canvasQuery);
  * @returns {number} The ID used for clearInterval()
  */
 export function main(onStart) {
-	initControllers();
 
 	const canvas = canvasElement.getContext("2d");
 	canvasElement.height = canvasConfig.size.y;
@@ -33,6 +32,7 @@ export function main(onStart) {
 	canvas.save();
 
 	onStart();
+	initControllers();
 
 	return setInterval(() => {
 		Update(tick);

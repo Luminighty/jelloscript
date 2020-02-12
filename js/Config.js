@@ -50,7 +50,8 @@ export const colliderTags = {
  * @type {Object.<string, Array.<string>>}
  */
 export const collisionIgnoreMatrix = {
-	default: [colliderTags.background]
+	default: [colliderTags.background],
+	player: [colliderTags.player],
 };
 
 /** How many times should the collision be checked between 2 positions */

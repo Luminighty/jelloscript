@@ -1,5 +1,5 @@
 import { Axis, Button } from "./engine/InputManager";
-import { addTouchInput, FromPlayer, AxisKeys, Mouse } from "./engine/Controller";
+import { addTouchInput, AxisKeys } from "./engine/Controller";
 
 /** @typedef {Buttons} Button */
 export const Buttons = {
@@ -130,4 +130,4 @@ export const mouseConfig = {
 
 
 // Re-exporting for easier access
-export {Mouse, FromPlayer};
+export {Mouse, FromPlayer, OnNewControllerListener} from "./engine/Controller";

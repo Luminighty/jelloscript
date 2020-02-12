@@ -76,6 +76,10 @@ class Controller {
 			}
 		}
 		controllers[this.id] = this;
+
+		for (const listener of newControllerListeners) {
+			listener(this.input, this.id);
+		}
 	}
 
 	update() {
@@ -119,7 +123,7 @@ class Controller {
 	/** @type {Number} */
 	get type() {}
 
-	setButtonKey(buttonKey, key) { this.axisKeys[buttonKey] = key; }
+	setButtonKey(buttonKey, key) { this.buttonKeys[buttonKey] = key; }
 
 	setAxisKey(axisKey, key) { this.axisKeys[axisKey] = key; }
 
@@ -184,6 +188,7 @@ class KeyboardController extends Controller {
 	 */
 	constructor(buttons, axes) {
 		super(buttons, axes);
+		KeyboardPlayerIds.push(this._id);
 	}
 
 	get type() { return InputMethods.KEYBOARD; }
@@ -393,6 +398,27 @@ const controllers = {};
  */
 export function FromPlayer(id) {
 	return controllers[id].input;
+}
+
+export const KeyboardPlayerIds = [];
+
+/**
+ * The method called when a new controller was attached
+ * 
+ * @callback newControllerCallback
+ * @param {import("./InputManager").Inputs} input
+ * @param {String} id
+ */
+
+ /** @type [newControllerCallback] */
+const newControllerListeners = [];
+
+/**
+ * Adds a listener that is called whenever a new Controller was attached
+ * @param {newControllerCallback} listener 
+ */
+export function OnNewControllerListener(listener) {
+	newControllerListeners.push(listener);
 }
 
 export function updateControllers() {
