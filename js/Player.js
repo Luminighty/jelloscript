@@ -6,7 +6,6 @@ import * as Utils from './engine/Utils';
 import Animator from "./engine/Animator";
 import BoxCollider from './engine/BoxCollider';
 import { colliderTags } from './Config';
-import { onAnyKeyboardKey, onAnyGamepadButtons, setKeyboardKey, setKeyboardKeyOnNextPress } from './engine/InputManager';
 import Camera from './engine/Camera';
 
 class PlayerAnimator extends Animator {
@@ -54,6 +53,9 @@ export default class Player extends GameObject {
 		
 		const horizontal = Input.Axes.Horizontal.value;
 		const vertical = Input.Axes.Vertical.value;
+
+		//console.log(`${horizontal} - ${vertical}`);
+		
 
 		let pos = this.position;
 		pos.x += horizontal;

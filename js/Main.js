@@ -8,7 +8,8 @@ import Water from './Water';
 document.title = "Test Game";
 
 window.main = main(() => {
-
+	console.log("Hello World");
+	
 	for(let i = 0; i < 25; i++) 
 	for(let j = 0; j < 15; j++)
 		GameObject.init(new Grass(i*16,j*16, "NORMAL"), 0);

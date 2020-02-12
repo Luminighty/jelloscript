@@ -1,5 +1,5 @@
-import { Axis, Button, Mouse, AxisKeys } from "./engine/InputManager";
-import { addTouchInput, FromPlayer, initControllers } from "./engine/Controller";
+import { Axis, Button } from "./engine/InputManager";
+import { addTouchInput, FromPlayer, AxisKeys, Mouse } from "./engine/Controller";
 
 /** @typedef {Buttons} Button */
 export const Buttons = {
@@ -22,7 +22,7 @@ export const DefaultKeyboardControls = [
 		},
 		Axes: {
 			Horizontal: AxisKeys("ArrowRight", "ArrowLeft"),
-			Vertical:   AxisKeys("ArrowDown"   , "ArrowDown")
+			Vertical:   AxisKeys("ArrowDown"   , "ArrowUp")
 		}
 	},
 	{
@@ -31,7 +31,7 @@ export const DefaultKeyboardControls = [
 			B: "KeyG"
 		},
 		Axes: {
-			Horizontal: AxisKeys("ArrowRight", "ArrowLeft"),
+			Horizontal: AxisKeys("KeyD", "KeyA"),
 			Vertical:   AxisKeys("KeyS"   , "KeyW")
 		}
 	}
@@ -108,7 +108,7 @@ addTouchInput(TouchInputs);
 /** @typedef {Object} axisConfig */
 export const axisConfig = {
 	0: {	// Gamepad
-		dead: 0.1
+		dead: 0.15
 	},
 	1: {	// Keyboard
 		gravity: 0.3,
@@ -131,4 +131,3 @@ export const mouseConfig = {
 
 // Re-exporting for easier access
 export {Mouse, FromPlayer};
-initControllers();

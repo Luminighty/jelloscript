@@ -1,8 +1,3 @@
-import * as Utils from './Utils';
-import { axisConfig, mouseConfig } from "../Input";
-import { Vector2 } from './Struct';
-import { canvasConfig } from '../Config';
-import { updateControllers, AxisKeys } from "./Controller";
 
 /**
  * @enum {number}
@@ -117,16 +112,6 @@ export class Axis extends Input {
 }
 
 
-/**
- * @private
- */
-export function update() {
-	Mouse.wheel = 0;
-	updateControllers();
-}
-
-
-
 /** @returns {Promise<KeyboardEvent.code>} */
 export function onAnyKeyboardKey() {
 	return new Promise(res => {
@@ -180,82 +165,3 @@ export function setGamepadKeyOnNextPress(key) {
 
 
 
-
-
-
-
-export const Mouse = (function() {
-	const Mouse = {
-		position: Vector2.zero,
-		/** @type {[Number]} */
-		pressed: [],
-		/** @param {Number} key */
-		isPressed: function(key) {
-			for (const btn of this.pressed)
-				if (btn == key)
-					return true;
-			return false;
-		},
-		wheel: 0
-	};
-
-
-	/** @type {HTMLCanvasElement} */
-	const canvas = document.body.querySelector(canvasConfig.canvasQuery);
-
-	window.addEventListener("mousemove", (e) => {
-		const rect = canvas.getBoundingClientRect();
-		const size = canvasConfig.size;
-		const scale = {x: rect.width / size.x, y: rect.height / size.y };
-
-		const newPosition = {x: (e.clientX - rect.x) / scale.x, y: (e.clientY - rect.y) / scale.y};
-		if (!mouseConfig.allowOutsideMousePosition && isOutsideOfCanvas(newPosition, rect))
-			return;
-		Mouse.position = new Vector2(newPosition.x, newPosition.y);
-	});
-
-	window.addEventListener("mousedown", (e) => {
-		Mouse.pressed.push(e.button);
-	});
-	window.addEventListener("mouseup", (e) => {
-		Mouse.pressed.splice(Mouse.pressed.indexOf(e.button), 1);
-	});
-	window.addEventListener("mousewheel", (e) => {
-		Mouse.wheel = e.deltaY;
-	});
-
-	/**
-	 * @param {Vector2} position 
-	 * @returns {Boolean}
-	 */
-	function isOutsideOfCanvas(position) {
-		return position.x < 0 || position.y < 0	|| position.x > canvasConfig.size.x || position.y > canvasConfig.size.y;
-	}
-
-	return Mouse;
-}());
-// ------ MOUSE END ------
-
-
-export {AxisKeys};
-
-let lastUsedController = null;
-export function lastUsed(controller) {
-	if (lastUsedController === controller)
-		return;
-
-	lastUsedController = controller;
-	for (const key in controller.buttons) {
-		if (controller.buttons.hasOwnProperty(key)) {
-			const element = controller.buttons[key];
-			Buttons[key] = element;
-		}
-	}
-
-	for (const key in controller.axes) {
-		if (controller.axes.hasOwnProperty(key)) {
-			const element = controller.axes[key];
-			Axes[key] = element; 
-		}
-	}
-}

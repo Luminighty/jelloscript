@@ -1,8 +1,9 @@
-import { Axis, Button, InputMethods, lastUsed } from "./InputManager";
-import { axisConfig, Axes, Buttons, DefaultGamepadControls, DefaultKeyboardControls } from "../Input";
-import { mobileAndTabletCheck } from "./run";
-import * as Utils from "./Utils";
-
+import * as Utils from './Utils';
+import { Vector2 } from './Struct';
+import { canvasConfig } from '../Config';
+import { Axis, Button, InputMethods } from "./InputManager";
+import { mouseConfig, axisConfig, DefaultGamepadControls, DefaultKeyboardControls } from "../Input";
+import { Axes, Buttons } from "../Input";
 
 const generateId = (function () {
 	let id = 0;
@@ -46,7 +47,7 @@ class Controller {
 		 * @example
 		 * 	this.buttonKeys = {'A': "LeftArrow", 'B': "X" }
 		 *  */
-		this.axisKeys = buttons;
+		this.buttonKeys = buttons;
 		/** 
 		 * Used to map the axis names to the physical keys/axises
 		 * @type {Object.<String, (String|Number)>}
@@ -81,7 +82,7 @@ class Controller {
 		for (const key in this.buttons) {
 			if (this.buttons.hasOwnProperty(key)) {
 				const button = this.buttons[key];
-				const buttonKey = this.axisKeys[key];
+				const buttonKey = this.buttonKeys[key];
 				this.updateButton(button, buttonKey);
 			}
 		}
@@ -138,11 +139,11 @@ class Controller {
 	 * @returns {Button}
 	 */
 	getButton(key) {
-		for (const buttonName in this.axisKeys) {
-			if (this.axisKeys.hasOwnProperty(buttonName)) {
-				const buttonKey = this.axisKeys[buttonName];
+		for (const buttonName in this.buttonKeys) {
+			if (this.buttonKeys.hasOwnProperty(buttonName)) {
+				const buttonKey = this.buttonKeys[buttonName];
 				if (buttonKey == key)
-					return this.buttons[buttonKey];
+					return this.buttons[buttonName];
 			}
 		}
 		return null;
@@ -158,7 +159,7 @@ class Controller {
 			if (this.axisKeys.hasOwnProperty(axisName)) {
 				const axisKey = this.axisKeys[axisName];
 				if (axisKey == key)
-					return this.axes[axisKey];
+					return this.axes[axisName];
 			}
 		}
 		return null;
@@ -208,9 +209,9 @@ class KeyboardController extends Controller {
 			if (this.axisKeys.hasOwnProperty(axisName)) {
 				const axisKey = this.axisKeys[axisName];
 				if (axisKey.positive == key)
-					return {axis: this.axes[axisKey], value: 1};
+					return {axis: this.axes[axisName], value: 1};
 				if (axisKey.negative == key)
-					return {axis: this.axes[axisKey], value: -1};
+					return {axis: this.axes[axisName], value: -1};
 			}
 		}
 		return null;
@@ -225,10 +226,11 @@ class KeyboardController extends Controller {
 		 * @param {Number} value 
 		 */
 		const updateKeyFromKeyboard = function(controller, keycode, value) {
+			
 			const btn = controller.getButton(keycode);
 			if (btn != null) {
 				btn.state = value;
-				lastUsed(this);
+				lastUsed(controller);
 			}
 
 			const axisValue = controller.getAxis(keycode);
@@ -243,7 +245,7 @@ class KeyboardController extends Controller {
 				if (value > 0 || axis.toValue * sign > 0)
 					axis.toValue = (value > 0) ? sign : 0;
 				
-				lastUsed(this);
+				lastUsed(controller);
 			}
 		};
 
@@ -295,7 +297,7 @@ class GamepadController extends Controller {
 			button.state = 1;
 			lastUsed(this);
 		}
-		if (!this.gamepad.buttons[key].pressed && button.state >= 0) {
+		if (!this.gamepad.buttons[key].pressed && button.state > 0) {
 			button.state = -1;
 			lastUsed(this);
 		}
@@ -406,19 +408,14 @@ export function updateControllers() {
  * @param {import("../Input").TouchInputLayout} layoutConfig
  * @param {Boolean} onlyPhone Whenever it should be added only when played on the phone (true by default) 
  */
-export function addTouchInput(layoutConfig, onlyPhone = true) {
-	if (!onlyPhone || mobileAndTabletCheck())
-		new TouchController(layoutConfig, Buttons, Axes);
+export function addTouchInput(layoutConfig, buttons, axes, onlyPhone = true) {
+	if (!onlyPhone || Utils.mobileAndTabletCheck())
+		new TouchController(layoutConfig, buttons, axes);
 }
 
 
-
-
-
-
 export function initControllers() {
-
-	if (!mobileAndTabletCheck()) {
+	if (!Utils.mobileAndTabletCheck()) {
 		for (const keyboard of DefaultKeyboardControls) {
 			new KeyboardController(keyboard.Buttons, keyboard.Axes);
 		}
@@ -427,11 +424,93 @@ export function initControllers() {
 	window.addEventListener("gamepadconnected", (e) => {
 		/** @type {Gamepad} */
 		const gamepad = e.gamepad;
-		lastUsedController = new GamepadController(
+		lastUsed(new GamepadController(
 			gamepad.index, 
 			DefaultGamepadControls.Buttons, 
 			DefaultGamepadControls.Axes
-		);
+		));
 	});
 }
 
+
+
+
+let lastUsedController = null;
+/** @param {Controller} controller */
+export function lastUsed(controller) {
+	if (lastUsedController !== null && lastUsedController._id === controller._id)
+		return;
+
+	lastUsedController = controller;
+	for (const key in controller.buttons) {
+		if (controller.buttons.hasOwnProperty(key)) {
+			const element = controller.buttons[key];
+			Buttons[key] = element;
+		}
+	}
+
+	for (const key in controller.axes) {
+		if (controller.axes.hasOwnProperty(key)) {
+			const element = controller.axes[key];
+			Axes[key] = element; 
+		}
+	}
+}
+
+
+
+
+// ------ MOUSE START ------
+export const Mouse = (function() {
+	const Mouse = {
+		position: Vector2.zero,
+		/** @type {[Number]} */
+		pressed: [],
+		/** @param {Number} key */
+		isPressed: function(key) {
+			for (const btn of this.pressed)
+				if (btn == key)
+					return true;
+			return false;
+		},
+		wheel: 0
+	};
+
+
+	/** @type {HTMLCanvasElement} */
+	const canvas = document.body.querySelector(canvasConfig.canvasQuery);
+
+	window.addEventListener("mousemove", (e) => {
+		const rect = canvas.getBoundingClientRect();
+		const size = canvasConfig.size;
+		const scale = {x: rect.width / size.x, y: rect.height / size.y };
+
+		const newPosition = {x: (e.clientX - rect.x) / scale.x, y: (e.clientY - rect.y) / scale.y};
+		if (!mouseConfig.allowOutsideMousePosition && isOutsideOfCanvas(newPosition, rect))
+			return;
+		Mouse.position = new Vector2(newPosition.x, newPosition.y);
+	});
+
+	window.addEventListener("mousedown", (e) => {
+		Mouse.pressed.push(e.button);
+	});
+	window.addEventListener("mouseup", (e) => {
+		Mouse.pressed.splice(Mouse.pressed.indexOf(e.button), 1);
+	});
+	window.addEventListener("mousewheel", (e) => {
+		Mouse.wheel = e.deltaY;
+	});
+
+	/**
+	 * @param {Vector2} position 
+	 * @returns {Boolean}
+	 */
+	function isOutsideOfCanvas(position) {
+		return position.x < 0 || position.y < 0	|| position.x > canvasConfig.size.x || position.y > canvasConfig.size.y;
+	}
+
+	return Mouse;
+}());
+
+
+// ------ MOUSE END ------
