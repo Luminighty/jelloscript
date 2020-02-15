@@ -30,7 +30,7 @@ export function AxisKeys(positive, negative) {
  * @public
  * @class
  */
-class Controller {
+export class Controller {
 
 	/**
 	 * 
