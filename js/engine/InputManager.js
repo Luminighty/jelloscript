@@ -28,8 +28,8 @@ export const InputMethods = {
 
 /**
  * @typedef {Object} Inputs
- * @property {Axes} Axes
- * @property {Buttons} Buttons
+ * @property {import("../Input").Axis} Axes
+ * @property {import("../Input").Button} Buttons
  */
 
 
@@ -48,6 +48,43 @@ class Input {
 		 * @type {Number}
 		 */
 		this.state = 0;
+		/** 
+		 * @private
+		 * @type {Object.<String, Object.<Number, CallableFunction> >} */
+		this._listeners = {};
+		this._listenerId = 0;
+	}
+
+	/**
+	 * @protected
+	 */
+	_addListener(type, callback) {
+		this._listenerId++;
+		if (this._listeners[type] == undefined)
+			this._listeners[type] = {};
+		this._listeners[type][this._listenerId] = callback;
+		return {type, id: this._listenerId};
+	}
+
+	removeListener(id) {
+		delete this._listeners[id.type][id.id];
+	}
+
+	/**
+	 * Calls the attached listeners with the same type
+	 * Note: This won't set the Input's state. 
+	 * @param {String} type 
+	 */
+	callListener(type) {
+		const listenersWithType = this._listeners[type];
+		for (const id in listenersWithType) {
+			if (listenersWithType.hasOwnProperty(id)) {
+				const listener = listenersWithType[id];
+				if (!listener)
+					continue;
+				listener();
+			}
+		}
 	}
 }
 
@@ -80,7 +117,17 @@ export class Button extends Input {
 	 * @type Boolean 
 	 */
 	get isUp() {return this.state < 0;}
+
+	onPressed(callback) {
+		return this._addListener(Button.listenerTypes.Pressed, callback);
+	}
+
+	onReleased(callback) {
+		return this._addListener(Button.listenerTypes.Released, callback);
+	}
 }
+
+Button.listenerTypes = {Pressed: 0, Released: 1};
 
 export class Axis extends Input {
 	

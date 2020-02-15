@@ -231,10 +231,14 @@ class KeyboardController extends Controller {
 		 * @param {Number} value 
 		 */
 		const updateKeyFromKeyboard = function(controller, keycode, value) {
-			
 			const btn = controller.getButton(keycode);
-			if (btn != null) {
+
+			/** Only set the state if we're releasing the button, or if we've just pressed it */
+			if (btn != null && (value != 1 || btn.state < 1)) {
 				btn.state = value;
+
+				const listenerType = (value == 1) ? Button.listenerTypes.Pressed : Button.listenerTypes.Released;
+				btn.callListener(listenerType);
 				lastUsed(controller);
 			}
 
@@ -300,10 +304,12 @@ class GamepadController extends Controller {
 		super.updateButton(button, key);
 		if (this.gamepad.buttons[key].pressed && button.state <= 0) {
 			button.state = 1;
+			button.callListener(Button.listenerTypes.Pressed);
 			lastUsed(this);
 		}
 		if (!this.gamepad.buttons[key].pressed && button.state > 0) {
 			button.state = -1;
+			button.callListener(Button.listenerTypes.Released);
 			lastUsed(this);
 		}
 	}
@@ -361,6 +367,7 @@ class TouchController extends Controller {
 				/** @type {Button} */
 				const btn = controller.buttons[key];
 				btn.state = 1;
+				btn.callListener(Button.listenerTypes.Pressed);
 				lastUsed(controller);
 			});
 			element.addEventListener("touchend", (e) => {
@@ -368,6 +375,7 @@ class TouchController extends Controller {
 				/** @type {Button} */
 				const btn = controller.buttons[key];
 				btn.state = -1;
+				btn.callListener(Button.listenerTypes.Released);
 			});
 		};
 
