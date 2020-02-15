@@ -21,6 +21,6 @@ window.main = main(() => {
 
 	//GameObject.init(new Player(), 1000);
 	GameObject.init(new Water(30,30));
-	sounds.MUSIC.test.play();
+	//sounds.MUSIC.test.play();
 
 });
