@@ -11,8 +11,16 @@
     <title></title>
 </head>
 <body>
+	<!-- To be removed -->
+	<div id="btn-host">HOST</div>
+	<div id="btn-connect">CONNECT</div>
+	
+	
 	<canvas id="mainCanvas"></canvas>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=" crossorigin="anonymous"></script>
-    <script type="module" src="./js/Main.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
+	<script>
+		window.io = io;
+	</script>
+	<script type="module" src="./js/Main.js"></script>
 </body>
 </html>

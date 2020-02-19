@@ -5,6 +5,7 @@ import Player from './Player';
 import Grass from "./Grass";
 import Water from './Water';
 import * as Input from "./Input";
+import NetworkManager from "./engine/Networking";
 
 document.title = "Test Game";
 
@@ -23,4 +24,18 @@ window.main = main(() => {
 	GameObject.init(new Water(30,30));
 	//sounds.MUSIC.test.play();
 
+});
+
+
+let firstLobby = null;
+NetworkManager.host("abc");
+NetworkManager.refreshLobbies();
+NetworkManager.onLobbiesRefreshed((lobbies) => {
+	console.log(lobbies);
+	if (lobbies.length > 0)
+	firstLobby = lobbies[0];
+});
+
+document.querySelector("#btn-connect").addEventListener("click", (e) => {
+	NetworkManager.connect(firstLobby);
 });

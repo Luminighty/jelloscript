@@ -53,19 +53,19 @@ export default class Player extends GameObject {
 		this.input.Buttons.A.onPressed(this.onShoot);
 		this.input.Buttons.B.onPressed(this.onB);
 		this.input.Buttons.A.onReleased(() => {
-			console.log("A released");
+			//console.log("A released");
 		});
 		this.input.Buttons.B.onReleased(() => {
-			console.log("B released");
+			//console.log("B released");
 		});
 	}
 
 	onShoot() {
-		console.log("A pressed");
+		//console.log("A pressed");
 	}
 
 	onB() {
-		console.log("B pressed");
+		//console.log("B pressed");
 	}
 
 	update(tick) {

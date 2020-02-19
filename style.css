@@ -10,3 +10,21 @@ html {
     transform: translate(-50%, -50%);
 	background-color: white;
 }
+
+#btn-host {
+	position: fixed;
+	background-color: white;
+	color: red;
+	font-size: 16px;
+	top: 10px;
+	left: 10px;
+}
+
+#btn-connect {
+	position: fixed;
+	background-color: white;
+	color: blue;
+	font-size: 16px;
+	top: 30px;
+	left: 10px;
+}

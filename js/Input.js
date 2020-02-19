@@ -131,7 +131,7 @@ export const networkConfig = {
 	enabled: true,
 	host: "http://localhost",
 	defaultConnectionLimit: 4,
-}
+};
 
 
 // Re-exporting for easier access

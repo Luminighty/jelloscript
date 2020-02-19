@@ -4,9 +4,10 @@ import { canvasConfig } from '../Config';
 import { Axis, Button, InputMethods } from "./InputManager";
 import { mouseConfig, axisConfig, DefaultGamepadControls, DefaultKeyboardControls } from "../Input";
 import { Axes, Buttons } from "../Input";
+import EventHandler from "./EventHandler";
 
 const generateId = (function () {
-	let id = 0;
+	let id = Date.now();
 	return function() {
 		return `${id++}`;
 	};
@@ -63,7 +64,7 @@ export class Controller {
 		this.buttons = {};
 		for (const key in buttons) {
 			if (buttons.hasOwnProperty(key)) {
-				this.buttons[key] = new Button();				
+				this.buttons[key] = new Button();			
 			}
 		}
 		/** @type {Axes} axes */
@@ -77,9 +78,13 @@ export class Controller {
 		}
 		controllers[this.id] = this;
 
-		for (const listener of newControllerListeners) {
-			listener(this.input, this.id);
-		}
+
+		newControllerHandler.forEach("default", (listener) => {
+			listener(this.input, this.id, this.type);
+		});
+
+		this.eventHandler = new EventHandler();
+
 	}
 
 	update() {
@@ -123,10 +128,22 @@ export class Controller {
 	/** @type {Number} */
 	get type() {}
 
+	/**
+	 * @param {String} buttonKey 
+	 * @param {String|Number} key 
+	 */
 	setButtonKey(buttonKey, key) { this.buttonKeys[buttonKey] = key; }
 
+	/**
+	 * @param {String} buttonKey 
+	 * @param {Number} key 
+	 */
 	setAxisKey(axisKey, key) { this.axisKeys[axisKey] = key; }
 
+	/** 
+	 * Sets the DOM listeners for the Controller
+	 * @protected
+	 */
 	setListeners() {}
 
 	/** @type import("./InputManager").Inputs */
@@ -169,6 +186,47 @@ export class Controller {
 		return null;
 	}
 
+	/** Returns the current state of the controller */
+	get states() {
+		/** @type {Number[]} */
+		const axes = [];
+		/** @type {Number[]} */
+		const buttons = [];
+		for (const key in this.axes) {
+			if (this.axes.hasOwnProperty(key)) {
+				/** @type {Axis} */
+				const axis = this.axes[key];
+				axes[key] = axis.state;
+			}
+		}
+		for (const key in this.buttons) {
+			if (this.buttons.hasOwnProperty(key)) {
+				/** @type {Button} */
+				const btn = this.buttons[key];
+				buttons[key] = btn.state;
+			}
+		}
+
+		return {
+			axes: axes,
+			buttons: buttons
+		};
+	}
+
+	/**
+	 * @callback ControllerStateCallback
+	 * @param {{axes: Number[], buttons: Number[]}} state
+	 */
+
+	/** @param {ControllerStateCallback} callback */
+	onInputReceived(callback) {
+		this.eventHandler.on("input", callback);
+	}
+
+	/** @protected */
+	callInputReceived() {
+		this.eventHandler.call("input", this.states);
+	}
 }
 
 class KeyboardController extends Controller {
@@ -267,8 +325,6 @@ class KeyboardController extends Controller {
 		});
 	}
 }
-
-
 
 class GamepadController extends Controller {
 
@@ -418,15 +474,14 @@ export const KeyboardPlayerIds = [];
  * @param {String} id
  */
 
- /** @type [newControllerCallback] */
-const newControllerListeners = [];
+const newControllerHandler = new EventHandler();
 
 /**
  * Adds a listener that is called whenever a new Controller was attached
  * @param {newControllerCallback} listener 
  */
 export function OnNewControllerListener(listener) {
-	newControllerListeners.push(listener);
+	newControllerHandler.on("default", listener);
 }
 
 export function updateControllers() {
@@ -437,6 +492,7 @@ export function updateControllers() {
 		}
 	}
 }
+
 /**
  * Adds a mobile touch layout for the game
  * @param {import("../Input").TouchInputLayout} layoutConfig
@@ -467,8 +523,6 @@ export function initControllers() {
 }
 
 
-
-
 let lastUsedController = null;
 /** @param {Controller} controller */
 export function lastUsed(controller) {
@@ -490,6 +544,8 @@ export function lastUsed(controller) {
 		}
 	}
 }
+
+
 
 
 
