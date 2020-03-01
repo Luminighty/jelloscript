@@ -2,20 +2,19 @@
 const jello = require("./jelloLobby");
 const express = require("express");
 const app = express();
-var http = require('http').createServer(app);
+var server = require('http').Server(app);
 
-const PORT = 8080;
+const PORT = 12345;
+const HOST = 'localhost';
 
-jello.init(http);
-
-
-app.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
 	console.log(`Listening on ${PORT}`);
-	console.log(`http://localhost:${PORT}/`);			
+	console.log(`http://${HOST}:${PORT}/`);		
+	jello.init(server);
 });
 
 app.use(express.static("..", {extensions: ['html', 'js']}));
-
-http.listen(3000, function(){
+/*
+http.listen(PORT, function(){
 	console.log('listening on *:3000');
-});
+});*/

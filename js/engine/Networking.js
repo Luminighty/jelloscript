@@ -1,53 +1,64 @@
-import {Controller,lastUsed, OnNewControllerListener} from "./Controller";
-import {networkConfig} from "../Input";
+import {Controller, OnNewControllerListener, foreachController} from "./Controller";
+import {networkConfig, axisConfig} from "../Input";
 import { Axis, Button } from "./InputManager";
 import EventHandler from "./EventHandler";
 
 
-let socket = window.io(networkConfig.host);
+let socket = window.io(/*networkConfig.host*/);
+
+socket.on("connect", () => {
+	console.log("connected");
+});
 
 
 class NetworkController extends Controller {
 	constructor(buttons, axes, type, id) {
-		super(buttons, axes);
-		this.type = type;
+		super(buttons, axes, false);
 		this.networkId = id;
-
+		this._type = type;
 		for (const key in buttons) {
 			if (buttons.hasOwnProperty(key)) {
 				const state = buttons[key];
-				this.buttons[key] = state;
+				this.buttons[key].state = state;
 			}
 		}
 
 		for (const key in axes) {
 			if (axes.hasOwnProperty(key)) {
 				const state = axes[key];
-				this.axes[key] = state;
+				this.axes[key].state = state;
+				this.axes[key].dead = axisConfig[this.type].dead;
 			}
 		}
 	}
 
+	get type() {return (this._type) ? this._type : 0; }
+
 	setListeners() {
-		socket.on("update controller", (id, isButton, key, value) => {
+		socket.on("update controller", (id, key, value, isButton) => {
 			if(id != this.networkId)
 				return;
+			//console.log({selfId: this.networkId, id, key, value, isButton});
 			
 			const input = (isButton) ? this.buttons : this.axes;
 			if (isButton && (input[key].state < 1 || value != 1)) {
 				const listenerType = (value == 1) ? Button.listenerTypes.Pressed : Button.listenerTypes.Released;
 				input[key].callListener(listenerType);
 			}
-			input[key] = value;
+			input[key].state = value;
 		});
 	}
+
+	updateAxis(axis, key) {}
+
 }
 
-OnNewControllerListener((inputs, id, type) => {
+
+function inputToValues(inputs) {
 	/** @type {Number[]} */
-	const axes = [];
+	const axes = {};
 	/** @type {Number[]} */
-	const buttons = [];
+	const buttons = {};
 	for (const key in inputs.Axes) {
 		if (inputs.Axes.hasOwnProperty(key)) {
 			/** @type {Axis} */
@@ -62,9 +73,22 @@ OnNewControllerListener((inputs, id, type) => {
 			buttons[key] = btn.state;
 		}
 	}
+	return {axes, buttons};
+}
 
+function addController(inputs, id, type, isLocal) {
+	if (!isLocal)
+		return;
+	
+	const {axes, buttons} = inputToValues(inputs);
 	socket.emit("new controller", {axes, buttons, id, type});
-});
+	inputs.Controller.onInputReceived((key, state, isButton) => {
+		socket.emit("update controller", id, key, state, isButton);
+	});
+}
+
+// On new controller we add it to the lobby
+OnNewControllerListener(addController);
 
 
 /**
@@ -96,7 +120,7 @@ function connect(lobby) {
 }
 
 function refreshLobbies(options) {
-	socket.emit("list lobbies", options);
+	socket.emit("list lobbies", (options) ? options : {});
 }
 
 function setStateGetter(callback) {
@@ -111,16 +135,14 @@ function updateState() {
 	socket.emit("update state");
 }
 
-
-
 socket.on("update lobbies", (lobbies) => {
 	NetworkManager.lobbies = lobbies;
 	events.call("lobby refresh", lobbies);
 });
 
-/** @deprecated ? */
-socket.on("new connection", (data) => {
-	console.log(data);
+/** @deprecated Don't really have to call this */
+socket.on("new connection", () => {
+	console.log("New connection");
 });
 
 socket.on("get state", (sendState) => {
@@ -133,6 +155,10 @@ socket.on("set state", (state) => {
 
 socket.on("new controller", (buttons, axes, type, id) => {
 	new NetworkController(buttons, axes, type, id);
+});
+
+socket.on("get controllers", () => {
+	foreachController(addController);
 });
 
 let getState = function () { return {}; };

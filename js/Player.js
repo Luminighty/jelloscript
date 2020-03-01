@@ -40,6 +40,8 @@ class PlayerAnimator extends Animator {
 
 export default class Player extends GameObject {
 	constructor(input, x=10, y=10) {
+		console.log(input);
+		
 		super();
 		this.position = {x: x, y: y};
 		this.sprite = sprites.player;

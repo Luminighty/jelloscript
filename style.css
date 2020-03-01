@@ -11,6 +11,8 @@ html {
 	background-color: white;
 }
 
+
+
 #btn-host {
 	position: fixed;
 	background-color: white;
@@ -19,11 +21,18 @@ html {
 	top: 10px;
 	left: 10px;
 }
-
 #btn-connect {
 	position: fixed;
 	background-color: white;
 	color: blue;
+	font-size: 16px;
+	top: 50px;
+	left: 10px;
+}
+#btn-refresh {
+	position: fixed;
+	background-color: white;
+	color: green;
 	font-size: 16px;
 	top: 30px;
 	left: 10px;

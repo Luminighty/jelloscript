@@ -10,12 +10,12 @@ export default class EventHandler {
 	 * @param {String} type 
 	 * @param {any} args 
 	 */
-	call(type, args) {
+	call(type, ...args) {
 		if (this.listeners[type] === undefined)
 			return;
 		const lists = this.listeners[type];
 		for (const list of lists) {
-			list(args);
+			list(...args);
 		}
 	}
 

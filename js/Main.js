@@ -27,15 +27,28 @@ window.main = main(() => {
 });
 
 
+let lobbies = [];
 let firstLobby = null;
-NetworkManager.host("abc");
-NetworkManager.refreshLobbies();
-NetworkManager.onLobbiesRefreshed((lobbies) => {
+NetworkManager.onLobbiesRefreshed((newLobbies) => {
+	lobbies = newLobbies;
 	console.log(lobbies);
-	if (lobbies.length > 0)
-	firstLobby = lobbies[0];
 });
 
 document.querySelector("#btn-connect").addEventListener("click", (e) => {
-	NetworkManager.connect(firstLobby);
+	NetworkManager.connect(lobbies[lobbies.length - 1]);
 });
+document.querySelector("#btn-host").addEventListener("click", NetworkManager.host);
+document.querySelector("#btn-refresh").addEventListener("click", NetworkManager.refreshLobbies);
+
+window.connectLobby = function(id) {
+	NetworkManager.connect(lobbies[id]);
+};
+
+window.hostLobby = NetworkManager.host;
+window.refreshLobbies = NetworkManager.refreshLobbies;
+
+/*
+const socket = window.io();
+socket.on("connect", () => {
+	console.log(`connected`);
+});*/

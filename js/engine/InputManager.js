@@ -75,14 +75,14 @@ class Input {
 	 * Note: This won't set the Input's state. 
 	 * @param {String} type 
 	 */
-	callListener(type) {
+	callListener(type, param) {
 		const listenersWithType = this._listeners[type];
 		for (const id in listenersWithType) {
 			if (listenersWithType.hasOwnProperty(id)) {
 				const listener = listenersWithType[id];
 				if (!listener)
 					continue;
-				listener();
+				listener(param);
 			}
 		}
 	}
@@ -156,8 +156,13 @@ export class Axis extends Input {
 	 * @type Number 
 	 */
 	get value() {return (Math.abs(this.state) > this.dead) ? this.state : 0;}
-}
 
+	/** Calls a callback with the value of the axis as a parameter */
+	onChanged(callback) {
+		return this._addListener(Axis.listenerTypes.Changed, callback);
+	}
+}
+Axis.listenerTypes = {Changed: 0};
 
 /** @returns {Promise<KeyboardEvent.code>} */
 export function onAnyKeyboardKey() {

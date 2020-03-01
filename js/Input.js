@@ -102,22 +102,26 @@ addTouchInput(TouchInputs);
  * Gravity: The speed the axis will fall back to 0
  * Sensivity: The speed the axis will reach 1, -1
  * dead: The minimum value the axis needs in order to return anything other than 0
- * radius: The axis radius for touch inputs above which the axis value will be capped 1
+ * minimumChange: The minimum value difference needed for an axis in order to call the inputReceived event
+ * radius: The axis radius for touch inputs above which the axis value will be capped 1 (for touch inputs)
  * { GAMEPAD: 0, KEYBOARD: 1, TOUCH: 2 }
  */
 /** @typedef {Object} axisConfig */
 export const axisConfig = {
 	0: {	// Gamepad
-		dead: 0.15
+		dead: 0.15,
+		minimumChange: 0.005,
 	},
 	1: {	// Keyboard
 		gravity: 0.3,
 		sensivity: 0.5,
-		dead: 0.1
+		dead: 0.1,
+		minimumChange: 0.005,
 	},
 	2: {	// Touch
 		dead: 0.1,
-		radius: 50
+		radius: 50,
+		minimumChange: 0.005,
 	}
 };
 

@@ -38,10 +38,9 @@ export class Controller {
 	 * @param {Object.<String, (String|Number)>} buttons 
 	 * @param {Object.<String, AxisKeys>} axes 
 	 */
-	constructor(buttons, axes) {
+	constructor(buttons, axes, isLocal = true) {
 		/** @private @readonly @type {String} */
 		this._id = generateId();
-		
 		/** 
 		 * Used to map the button key names to the physical keys
 		 * @type {Object.<String, (String|Number)>}
@@ -57,6 +56,8 @@ export class Controller {
 		 *  */
 		this.axisKeys = axes;
 		this.enabled = true;
+		this.isLocal = isLocal;
+		this.eventHandler = new EventHandler();
 		this.setListeners();
 
 
@@ -64,7 +65,14 @@ export class Controller {
 		this.buttons = {};
 		for (const key in buttons) {
 			if (buttons.hasOwnProperty(key)) {
-				this.buttons[key] = new Button();			
+				const btn = new Button();
+				this.buttons[key] = btn;
+				btn.onPressed(() => {
+					this.callInputReceived(key, 1, true);
+				});
+				btn.onReleased(() => {
+					this.callInputReceived(key, -1, true);
+				});
 			}
 		}
 		/** @type {Axes} axes */
@@ -73,6 +81,9 @@ export class Controller {
 			if (axes.hasOwnProperty(key)) {
 				const axis = new Axis();				
 				axis.dead = axisConfig[this.type].dead;
+				axis.onChanged((value) => {
+					this.callInputReceived(key, value, false);
+				});
 				this.axes[key] = axis;
 			}
 		}
@@ -80,10 +91,9 @@ export class Controller {
 
 
 		newControllerHandler.forEach("default", (listener) => {
-			listener(this.input, this.id, this.type);
+			listener(this.input, this.id, this.type, this.isLocal);
 		});
 
-		this.eventHandler = new EventHandler();
 
 	}
 
@@ -113,14 +123,19 @@ export class Controller {
 			button.state++;
 	}
 
-	/** @param {Axis} axis */
-	/** @param {String|Number} key */
+	/** @param {Axis} axis 
+	 * @param {String|Number} key */
 	updateAxis(axis, key) {
 		if (axis.state * axis.toValue < 0)
 			axis.state = 0;
 		const conf = axisConfig[this.type];
 		let multiplier = (axis.toValue == 0) ? conf.gravity : conf.sensivity;
-		axis.state = Utils.moveTowards(axis.state, axis.toValue, Math.abs(axis.state - axis.toValue) * multiplier);
+		const newState = Utils.moveTowards(axis.state, axis.toValue, Math.abs(axis.state - axis.toValue) * multiplier);
+		if (Math.abs(newState - axis.state) > axisConfig[this.type].minimumChange) {
+			axis.state = newState;
+			if (this.isLocal)
+				axis.callListener(Axis.listenerTypes.Changed, axis.state);
+		}
 	}
 
 	get id() { return this._id; }
@@ -146,11 +161,14 @@ export class Controller {
 	 */
 	setListeners() {}
 
-	/** @type import("./InputManager").Inputs */
+	/** @type import("./InputManager").Inputs 
+	 * Additionally returns the controller itself as Controller, however it is not advised to use it
+	*/
 	get input() {
 		return {
 			Buttons: this.buttons,
-			Axes: this.axes
+			Axes: this.axes,
+			Controller: this,
 		};
 	}
 
@@ -189,9 +207,9 @@ export class Controller {
 	/** Returns the current state of the controller */
 	get states() {
 		/** @type {Number[]} */
-		const axes = [];
+		const axes = {};
 		/** @type {Number[]} */
-		const buttons = [];
+		const buttons = {};
 		for (const key in this.axes) {
 			if (this.axes.hasOwnProperty(key)) {
 				/** @type {Axis} */
@@ -215,7 +233,7 @@ export class Controller {
 
 	/**
 	 * @callback ControllerStateCallback
-	 * @param {{axes: Number[], buttons: Number[]}} state
+	 * @param {{key: string, state: number, isButton: Boolean}} state
 	 */
 
 	/** @param {ControllerStateCallback} callback */
@@ -223,9 +241,13 @@ export class Controller {
 		this.eventHandler.on("input", callback);
 	}
 
-	/** @protected */
-	callInputReceived() {
-		this.eventHandler.call("input", this.states);
+	/** @protected
+	 * @param {String} key
+	 * @param {Number} state
+	 * @param {Boolean} isButton
+	 */
+	callInputReceived(key, state, isButton) {
+		this.eventHandler.call("input", key, state, isButton);
 	}
 }
 
@@ -346,7 +368,11 @@ class GamepadController extends Controller {
 	/** @param {Axis} axis */
 	/** @param {Number} key */
 	updateAxis(axis, key) {
-		axis.state = this.gamepad.axes[key];
+		const newState = this.gamepad.axes[key];
+		if (Math.abs(newState - axis.state) > axisConfig[this.type].minimumChange) {
+			axis.state = this.gamepad.axes[key];
+			axis.callListener(Axis.listenerTypes.Changed, axis.state);
+		}
 		if (Math.abs(axis.state) > 0.1)
 			lastUsed(this);
 	}
@@ -457,6 +483,22 @@ class TouchController extends Controller {
 const controllers = {};
 
 /**
+ * 
+ * @param {controllerCallback} callback 
+ * @param {controllerFilterCallback} filter
+ */
+export function foreachController(callback, filter) {
+	for (const key in controllers) {
+		if (controllers.hasOwnProperty(key)) {
+			const controller = controllers[key];
+			if (filter && filter(controller))
+				continue;
+			callback(controller.input, controller.id, controller.type, controller.isLocal);
+		}
+	}
+}
+
+/**
  * @returns {import("./InputManager").Inputs}
  * @param {String} id 
  */
@@ -466,19 +508,31 @@ export function FromPlayer(id) {
 
 export const KeyboardPlayerIds = [];
 
+
+/**
+ * The method called for filtering controllers
+ * 
+ * @callback controllerFilterCallback
+ * @param {Controller} input
+ * @returns {Boolean} Returns TRUE if the controller should NOT be used
+ */
+
+
 /**
  * The method called when a new controller was attached
  * 
- * @callback newControllerCallback
+ * @callback controllerCallback
  * @param {import("./InputManager").Inputs} input
- * @param {String} id
+ * @param {String} id controller id
+ * @param {Number} type controller type (gamepad | keyboard | Touch)
+ * @param {Boolean} isLocal Whenever the controller is a local or a remote controller
  */
 
 const newControllerHandler = new EventHandler();
 
 /**
  * Adds a listener that is called whenever a new Controller was attached
- * @param {newControllerCallback} listener 
+ * @param {controllerCallback} listener 
  */
 export function OnNewControllerListener(listener) {
 	newControllerHandler.on("default", listener);
