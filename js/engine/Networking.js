@@ -4,17 +4,20 @@ import { Axis, Button } from "./InputManager";
 import EventHandler from "./EventHandler";
 
 
-let socket = window.io(/*networkConfig.host*/);
+const socket = window.io(/*networkConfig.host*/);
 
 socket.on("connect", () => {
 	console.log("connected");
 });
 
-
+/**
+ * A remote player representation for a controller
+ */
 class NetworkController extends Controller {
 	constructor(buttons, axes, type, id) {
 		super(buttons, axes, false);
 		this.networkId = id;
+		/** @type {Number} */
 		this._type = type;
 		for (const key in buttons) {
 			if (buttons.hasOwnProperty(key)) {
@@ -38,7 +41,6 @@ class NetworkController extends Controller {
 		socket.on("update controller", (id, key, value, isButton) => {
 			if(id != this.networkId)
 				return;
-			//console.log({selfId: this.networkId, id, key, value, isButton});
 			
 			const input = (isButton) ? this.buttons : this.axes;
 			if (isButton && (input[key].state < 1 || value != 1)) {
@@ -49,15 +51,16 @@ class NetworkController extends Controller {
 		});
 	}
 
+	/** The axis gets updated from the listeners */
 	updateAxis(axis, key) {}
 
 }
 
-
+/** Converts the inputs to only have their states */
 function inputToValues(inputs) {
-	/** @type {Number[]} */
+	/** @type {Object.<string, number>} */
 	const axes = {};
-	/** @type {Number[]} */
+	/** @type {Object.<string, number>} */
 	const buttons = {};
 	for (const key in inputs.Axes) {
 		if (inputs.Axes.hasOwnProperty(key)) {
@@ -76,6 +79,7 @@ function inputToValues(inputs) {
 	return {axes, buttons};
 }
 
+/** Sends a new controller to the server. Only if it's a local controller */
 function addController(inputs, id, type, isLocal) {
 	if (!isLocal)
 		return;
@@ -92,48 +96,87 @@ OnNewControllerListener(addController);
 
 
 /**
+ * @typedef {Object} Lobby
+ * @property {Number} id 
+ * @property {String} lobbyName 
+ * @property {Number} connectionLimit 
+ * @property {any} data 
+ */
+
+/**
  * Container for lobby data
  * @param {Number} id The ID for the lobby
- * @param {*} lobbyName The display name for a lobby.
- * @param {*} connectionLimit The maximum number users can connect to a lobby
- * @param {*} data Optional data (description, lobby type, ect.)
+ * @param {String} lobbyName The display name for a lobby.
+ * @param {Number} connectionLimit The maximum number users can connect to a lobby
+ * @param {any} data Optional data (description, lobby type, ect.)
  */
-function Lobby(id, lobbyName, connectionLimit, data) {
-	return {
-		id,
-		lobbyName,
-		connectionLimit,
-		data
-	};
-}
 
+/**
+ * Hosts a lobby
+ * @param {String} lobbyName The display name of the lobby
+ * @param {Object} options Any data that can be attached to the lobby (Type, Level, Minimum Score, ...)
+ * @param {Number} connectionLimit Maximum amount of clients that can be connected to the lobby
+ */
 function host(lobbyName, options = {}, connectionLimit = 8) {
 	const defaultLimit = networkConfig.defaultConnectionLimit;
 	const limit = (connectionLimit == undefined) ? defaultLimit : connectionLimit;
 	socket.emit("host lobby", lobbyName, options, limit);
 }
 
+/**
+ * Connects to the lobby passed to the function
+ * @param {Lobby} lobby 
+ */
 function connect(lobby) {
 	if (lobby == undefined || lobby.id == undefined)
 		throw "Not a lobby!";
 	socket.emit("connect lobby", lobby.id);
 }
 
+/**
+ * Refreshes the lobbies list
+ * @param {Object} options Options for the query
+ */
 function refreshLobbies(options) {
 	socket.emit("list lobbies", (options) ? options : {});
 }
 
+/**
+ * Sets a function that should return the current state of the game used by the StateSetter
+ * @param {CallableFunction} callback 
+ */
 function setStateGetter(callback) {
 	getState = callback;
 }
 
+/**
+ * Sets a function that should set the current state of the game (returned by the StateGetter)
+ * @param {CallableFunction} callback 
+ */
 function setStateSetter(callback) {
 	getState = callback;
 }
 
+/**
+ * Updates the current state of the game after asking for an update from the host
+ */
 function updateState() {
 	socket.emit("update state");
 }
+
+socket.on("get state", (sendState) => {
+	sendState(getState());
+});
+
+socket.on("set state", (state) => {
+	setState(state);
+});
+
+
+
+let getState = function () { return {}; };
+let setState = function (state) {};
+
 
 socket.on("update lobbies", (lobbies) => {
 	NetworkManager.lobbies = lobbies;
@@ -145,14 +188,6 @@ socket.on("new connection", () => {
 	console.log("New connection");
 });
 
-socket.on("get state", (sendState) => {
-	sendState(getState());
-});
-
-socket.on("set state", (state) => {
-	setState(state);
-});
-
 socket.on("new controller", (buttons, axes, type, id) => {
 	new NetworkController(buttons, axes, type, id);
 });
@@ -161,11 +196,13 @@ socket.on("get controllers", () => {
 	foreachController(addController);
 });
 
-let getState = function () { return {}; };
-let setState = function (state) {};
 
 const events = new EventHandler();
 
+/**
+ * 
+ * @param {CallableFunction} callback 
+ */
 function onLobbiesRefreshed(callback) {
 	events.on("lobby refresh", callback);
 }
@@ -178,8 +215,10 @@ const NetworkManager = {
 	setStateGetter,
 	setStateSetter,
 	updateState,
-	/** @type Lobby */
+	/** @type {Lobby[]} */
 	lobbies: []
 };
+
+
 
 export default NetworkManager;

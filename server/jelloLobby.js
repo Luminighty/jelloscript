@@ -3,10 +3,26 @@ const socketIO = require('socket.io');
 /** @type {SocketIO.Server} */
 var io = null;
 
-exports.init = (server) => {
+let currentLogLevel = 1;
+
+exports.logLevels = {
+	None: 0,
+	Normal: 1,
+	Debug: 2,
+	All: 3,
+};
+
+exports.setLogLevel = function(logLevel) {currentLogLevel = logLevel;};
+
+/**
+ * Initializes the server
+ */
+exports.init = (server, loglevel = 1) => {
+	currentLogLevel = loglevel;
 	io = socketIO(server);
 	io.on('connect', onConnect);
-	console.log("Jello Lobby started...");
+	if (currentLogLevel >= this.logLevels.Normal)
+		console.log("Jello Lobby started...");
 };
 
 
@@ -14,13 +30,12 @@ exports.init = (server) => {
 function onConnect(socket) {
 
 	const addr = socket.id;
-	const log = (message) => { console.log(`${addr}: ${message}`); };
+	const log = (message, level = 3) => { if (level <= currentLogLevel) console.log(`${addr}: ${message}`); };
 	/** @type {Lobby} */
 	let currentLobby = null;
-	log("connected");
+	log("connected", 2);
 
 	const updateSocketState = () => {
-		//const currentLobby = currentLobbies.get(socket);
 		currentLobby.host.emit("get state", function(state) {
 			socket.emit();
 		});
@@ -43,10 +58,7 @@ function onConnect(socket) {
 		const lobby = new Lobby(socket, lobbyName, options, limit);
 		log(`Creating lobby: ${lobby.lobbyName}#${lobby.id}`);
 		currentLobby = lobby;
-		//currentLobbies.set(socket, lobby);
-		//console.log(`New current lobby: ${currentLobbies.get(socket)}`);
 		
-		//currentLobby = lobby;
 		socket.join(lobby.roomName);
 		socket.emit("get controllers");
 	});
@@ -60,7 +72,6 @@ function onConnect(socket) {
 		socket.join(lobby.roomName);
 		currentLobby = lobby;
 		log(`Connected to lobby: ${lobby.lobbyName}#${lobby.id}`);
-		//currentLobbies.set(socket, lobby);
 		socket.emit("get controllers");
 		updateSocketState();
 		sendControllers();
@@ -76,7 +87,6 @@ function onConnect(socket) {
 
 
 	socket.on("new controller", (controller) => {
-		//const currentLobby = currentLobbies.get(socket);
 		if (currentLobby == null)
 			return;
 		log("Connected a new controller");
@@ -86,24 +96,23 @@ function onConnect(socket) {
 	});
 
 	socket.on("update controller", (id, key, value, isButton) => {
-		//const currentLobby = currentLobbies.get(socket);
 		if (currentLobby == null)
 			return;
 		const controller = currentLobby.controllers[Controller.toId(socket, id)];
-		if (controller == null) {
+		if (controller == null && currentLogLevel >= 2) {
 			console.error(`Controller with Id '${Controller.toId(socket, id)}' not found!`);
 			console.log(Object.keys(currentLobby.controllers));
 			return;
 		}
 		const input = (isButton) ? controller.buttons : controller.axes;
 		input[key] = value;
-		//console.log("controller updated :)");
 		socket.to(currentLobby.roomName).emit("update controller", controller.id, key, value, isButton);
 	});
 }
 
 class Controller {
-	/**@param {SocketIO.Socket} socket 
+	/**
+	 * @param {SocketIO.Socket} socket 
 	 * @param {{type: Number, buttons: Object.<string, Number>, axes: Object.<string, Number>}} controller 
 	 */
 	constructor(socket, controller) {

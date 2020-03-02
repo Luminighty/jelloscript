@@ -1,3 +1,5 @@
+import EventHandler from "./EventHandler";
+
 
 /**
  * @enum {number}
@@ -37,6 +39,7 @@ export const InputMethods = {
  * @public
  * @class
  * @abstract
+ * The abstract class used for storing the state of inputs per controller
  */
 class Input {
 	/** Initializes a new Input */
@@ -50,24 +53,8 @@ class Input {
 		this.state = 0;
 		/** 
 		 * @private
-		 * @type {Object.<String, Object.<Number, CallableFunction> >} */
-		this._listeners = {};
-		this._listenerId = 0;
-	}
-
-	/**
-	 * @protected
-	 */
-	_addListener(type, callback) {
-		this._listenerId++;
-		if (this._listeners[type] == undefined)
-			this._listeners[type] = {};
-		this._listeners[type][this._listenerId] = callback;
-		return {type, id: this._listenerId};
-	}
-
-	removeListener(id) {
-		delete this._listeners[id.type][id.id];
+		 */
+		this._listeners = new EventHandler();
 	}
 
 	/**
@@ -75,22 +62,15 @@ class Input {
 	 * Note: This won't set the Input's state. 
 	 * @param {String} type 
 	 */
-	callListener(type, param) {
-		const listenersWithType = this._listeners[type];
-		for (const id in listenersWithType) {
-			if (listenersWithType.hasOwnProperty(id)) {
-				const listener = listenersWithType[id];
-				if (!listener)
-					continue;
-				listener(param);
-			}
-		}
+	callListener(type, ...param) {
+		this._listeners.call(type, ...param);
 	}
 }
 
 /**
  * @public
  * @class
+ * An input extended for representing Button presses
  */
 export class Button extends Input {
 	
@@ -118,12 +98,22 @@ export class Button extends Input {
 	 */
 	get isUp() {return this.state < 0;}
 
+	/**
+	 * Adds an event listener that's called whenever the button is pressed.
+	 * @param {CallableFunction} callback 
+	 * @public
+	 */
 	onPressed(callback) {
-		return this._addListener(Button.listenerTypes.Pressed, callback);
+		return this._listeners.on(Button.listenerTypes.Pressed, callback);
 	}
 
+	/**
+	 * Adds an event listener that's called whenever the button is released.
+	 * @param {CallableFunction} callback 
+	 * @public
+	 */
 	onReleased(callback) {
-		return this._addListener(Button.listenerTypes.Released, callback);
+		return this._listeners.on(Button.listenerTypes.Released, callback);
 	}
 }
 
@@ -157,11 +147,20 @@ export class Axis extends Input {
 	 */
 	get value() {return (Math.abs(this.state) > this.dead) ? this.state : 0;}
 
-	/** Calls a callback with the value of the axis as a parameter */
+	/**
+	 * Adds an event listener that's called whenever the axis' value changed at least with
+	 *  the minimum value (set in the input config)
+	 * @param {CallableFunction} callback 
+	 * @public
+	 */
 	onChanged(callback) {
-		return this._addListener(Axis.listenerTypes.Changed, callback);
+		return this._listeners.on(Axis.listenerTypes.Changed, callback);
 	}
 }
+/** 
+ * The types of listeners that's supported for the axis input
+ * Use the onChanged method instead
+ */
 Axis.listenerTypes = {Changed: 0};
 
 /** @returns {Promise<KeyboardEvent.code>} */
@@ -213,7 +212,3 @@ export function setGamepadKeyOnNextPress(key) {
 		setGamepadKey(key, code);
 	});
 }
-
-
-
-

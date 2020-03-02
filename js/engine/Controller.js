@@ -6,6 +6,9 @@ import { mouseConfig, axisConfig, DefaultGamepadControls, DefaultKeyboardControl
 import { Axes, Buttons } from "../Input";
 import EventHandler from "./EventHandler";
 
+/**
+ * Generates a unique Id
+ */
 const generateId = (function () {
 	let id = Date.now();
 	return function() {
@@ -27,6 +30,8 @@ export function AxisKeys(positive, negative) {
 }
 
 /**
+ * A collection of inputs based on the different kinds of input methods. 
+ * Every player will have one instance of this class
  * @abstract
  * @public
  * @class
@@ -56,7 +61,9 @@ export class Controller {
 		 *  */
 		this.axisKeys = axes;
 		this.enabled = true;
-		this.isLocal = isLocal;
+		/** @private */
+		this._isLocal = isLocal;
+		/** @private */
 		this.eventHandler = new EventHandler();
 		this.setListeners();
 
@@ -89,14 +96,20 @@ export class Controller {
 		}
 		controllers[this.id] = this;
 
-
 		newControllerHandler.forEach("default", (listener) => {
 			listener(this.input, this.id, this.type, this.isLocal);
 		});
-
-
 	}
 
+	/** 
+	 * True if the controller is using local controls. Otherwise it's being controlled over the network
+	 * @type {Boolean}
+	 */
+	get isLocal() { return this._isLocal; }
+
+	/**
+	 * Updates the state of inputs by calling their corresponding update method
+	 */
 	update() {
 		for (const key in this.buttons) {
 			if (this.buttons.hasOwnProperty(key)) {
@@ -115,6 +128,7 @@ export class Controller {
 	}
 
 	/**
+	 * Updates the state of the button
 	 * @param {Button} button
 	 * @param {String|Number} key
 	 */
@@ -123,7 +137,9 @@ export class Controller {
 			button.state++;
 	}
 
-	/** @param {Axis} axis 
+	/** 
+	 * Updates the state of the axis
+	 * @param {Axis} axis 
 	 * @param {String|Number} key */
 	updateAxis(axis, key) {
 		if (axis.state * axis.toValue < 0)
@@ -138,18 +154,25 @@ export class Controller {
 		}
 	}
 
+	/** 
+	 * The unique identifier for the controller
+	 * @type {String} */
 	get id() { return this._id; }
 
-	/** @type {Number} */
+	/** 
+	 * 
+	 * @type {Number} */
 	get type() {}
 
 	/**
+	 * Updates the physical button key assigned to the button
 	 * @param {String} buttonKey 
 	 * @param {String|Number} key 
 	 */
 	setButtonKey(buttonKey, key) { this.buttonKeys[buttonKey] = key; }
 
 	/**
+	 * Updates the physical button assigned to the axis
 	 * @param {String} buttonKey 
 	 * @param {Number} key 
 	 */
@@ -161,7 +184,8 @@ export class Controller {
 	 */
 	setListeners() {}
 
-	/** @type import("./InputManager").Inputs 
+	/** 
+	 * @type import("./InputManager").Inputs 
 	 * Additionally returns the controller itself as Controller, however it is not advised to use it
 	*/
 	get input() {
@@ -175,6 +199,7 @@ export class Controller {
 	/** 
 	 * Returns a button from a physical key
 	 * or null if not found
+	 * @param {String|Number} key
 	 * @returns {Button}
 	 */
 	getButton(key) {
@@ -191,6 +216,7 @@ export class Controller {
 	/** 
 	 * Returns an axis from a physical key
 	 * or null if not found
+	 * @param {String|Number} key
 	 * @returns {Axis}
 	 */
 	getAxis(key) {
@@ -206,9 +232,9 @@ export class Controller {
 
 	/** Returns the current state of the controller */
 	get states() {
-		/** @type {Number[]} */
+		/** @type {Object.<string, number>} */
 		const axes = {};
-		/** @type {Number[]} */
+		/** @type {Object.<string, number>} */
 		const buttons = {};
 		for (const key in this.axes) {
 			if (this.axes.hasOwnProperty(key)) {
@@ -233,15 +259,22 @@ export class Controller {
 
 	/**
 	 * @callback ControllerStateCallback
-	 * @param {{key: string, state: number, isButton: Boolean}} state
+	 * @param {String} key The key for identifying the input
+	 * @param {Number} state The new state value for the input
+	 * @param {Boolean} isButton The type of the input (True if it's a button, False if it's an axis)
 	 */
 
-	/** @param {ControllerStateCallback} callback */
+	/** 
+	 * Adds an event listener that's called whenever the controller receives input
+	 * @param {ControllerStateCallback} callback 
+	 */
 	onInputReceived(callback) {
 		this.eventHandler.on("input", callback);
 	}
 
-	/** @protected
+	/** 
+	 * Calls the onInputReceived listeners
+	 * @protected
 	 * @param {String} key
 	 * @param {Number} state
 	 * @param {Boolean} isButton
@@ -251,10 +284,12 @@ export class Controller {
 	}
 }
 
+/**
+ * The keyboard representation for a Controller
+ */
 class KeyboardController extends Controller {
 
 	/**
-	 * 
 	 * @param {Object.<String, (String|Number)} buttons 
 	 * @param {Object.<String, AxisKeys} axes 
 	 * 
@@ -271,12 +306,32 @@ class KeyboardController extends Controller {
 		KeyboardPlayerIds.push(this._id);
 	}
 
+	/** 
+	 * Returns InputMethods.KEYBOARD
+	 * @type {Number}
+	 */
 	get type() { return InputMethods.KEYBOARD; }
 
+	/**
+	 * Updates the physical button assigned to the axis
+	 * @param {String} axisKey The key used for the Inputs
+	 * @param {String} positiveKey The Keycode for the positive value
+	 */
 	setAxisPositive(axisKey, positiveKey) { this.axisKeys[axisKey].positive = positiveKey; }
 
+	/**
+	 * Updates the physical button assigned to the axis
+	 * @param {String} axisKey The key used for the Inputs
+	 * @param {String} negativeKey The Keycode for the negative value
+	 */
 	setAxisNegative(axisKey, negativeKey) { this.axisKeys[axisKey].negative = negativeKey; }
 
+	/**
+	 * Updates the physical button assigned to the axis
+	 * @param {String} axisKey The key used for the Inputs
+	 * @param {String} positiveKey The Keycode for the positive value
+	 * @param {String} negativeKey The Keycode for the negative value
+	 */
 	setAxisKey(axisKey, positiveKey, negativeKey) {
 		super.setAxisKey(axisKey, {
 			positive: positiveKey,
@@ -348,8 +403,24 @@ class KeyboardController extends Controller {
 	}
 }
 
+/**
+ * The gamepad representation for a Controller
+ */
 class GamepadController extends Controller {
 
+	/**
+	 * @param {Number} gamepadIndex gamepad.index
+	 * @param {Object.<String, Number} buttons 
+	 * @param {Object.<String, Number} axes 
+	 * 
+	 * @example
+	 *  const Buttons = { A: new Button(), B: new Button() };
+	 *  const Axes = { Horizontal: new Axis()};
+	 * 
+	 * 	new GamepadController(event.gamepad.index,
+	 * 		{ A: 0, B: 1},
+	 * 		{ Horizontal: 0});
+	 */
 	constructor(gamepadIndex, buttons, axes) {
 		super(buttons, axes);
 		/** @type {Number} */
@@ -358,6 +429,10 @@ class GamepadController extends Controller {
 		this.gamepad = navigator.getGamepads()[gamepadIndex];
 	}
 
+	/**
+	 * Returns InputMethods.GAMEPAD
+	 * @type {Number}
+	 */
 	get type() { return InputMethods.GAMEPAD; }
 
 	update() {
@@ -398,14 +473,31 @@ class GamepadController extends Controller {
 
 }
 
+
+/**
+ * The touch representation for a Controller (used for phones and tablets)
+ */
 class TouchController extends Controller {
 
+	/**
+	 * 
+	 * @param {import("../Input").TouchInputLayout} layout 
+	 * @param {Object.<String, Number} buttons 
+	 * @param {Object.<String, Number} axes 
+	 * 
+	 * @example
+	 * 	const layout = [...];
+	 *  const Buttons = { A: new Button(), B: new Button() };
+	 *  const Axes = { Horizontal: new Axis()};
+	 * 
+	 * 	new TouchController(index, Buttons, Axes);
+	 */
 	constructor(layout, buttons, axes) {
 		super(buttons, axes);
-		this.layout = inputs;
+		this.layout = layout;
 	}
 
-	addEventListener() {
+	setListeners() {
 
 		/** @param {HTMLImageElement} element 
 		 * @param {TouchController} controller
@@ -475,7 +567,10 @@ class TouchController extends Controller {
 		}
 	}
 
-
+	/**
+	 * Returns InputMethods.TOUCH
+	 * @type {Number}
+	 */
 	get type() { return InputMethods.TOUCH; }
 }
 
@@ -483,11 +578,11 @@ class TouchController extends Controller {
 const controllers = {};
 
 /**
- * 
+ * Loops through every controller and calls the callback if the filter returns true
  * @param {controllerCallback} callback 
- * @param {controllerFilterCallback} filter
+ * @param {controllerFilterCallback} filter If null then calls the callback for every controller
  */
-export function foreachController(callback, filter) {
+export function foreachController(callback, filter = null) {
 	for (const key in controllers) {
 		if (controllers.hasOwnProperty(key)) {
 			const controller = controllers[key];
@@ -499,6 +594,7 @@ export function foreachController(callback, filter) {
 }
 
 /**
+ * Gets a controller input reference from the controlller id
  * @returns {import("./InputManager").Inputs}
  * @param {String} id 
  */
@@ -506,6 +602,10 @@ export function FromPlayer(id) {
 	return controllers[id].input;
 }
 
+/**
+ * Stores the keyboard controller IDs
+ * @type {String[]}
+ */
 export const KeyboardPlayerIds = [];
 
 
@@ -528,6 +628,9 @@ export const KeyboardPlayerIds = [];
  * @param {Boolean} isLocal Whenever the controller is a local or a remote controller
  */
 
+ /**
+  * Stores the listeners attached for the controller events
+  */
 const newControllerHandler = new EventHandler();
 
 /**
@@ -538,6 +641,9 @@ export function OnNewControllerListener(listener) {
 	newControllerHandler.on("default", listener);
 }
 
+/**
+ * Calls Controller.update() on every attached controller
+ */
 export function updateControllers() {
 	for (const key in controllers) {
 		if (controllers.hasOwnProperty(key)) {
@@ -550,6 +656,8 @@ export function updateControllers() {
 /**
  * Adds a mobile touch layout for the game
  * @param {import("../Input").TouchInputLayout} layoutConfig
+ * @param {Buttons} buttons
+ * @param {Axes} axes
  * @param {Boolean} onlyPhone Whenever it should be added only when played on the phone (true by default) 
  */
 export function addTouchInput(layoutConfig, buttons, axes, onlyPhone = true) {
@@ -557,7 +665,10 @@ export function addTouchInput(layoutConfig, buttons, axes, onlyPhone = true) {
 		new TouchController(layoutConfig, buttons, axes);
 }
 
-
+/**
+ * Initializes every keyboard controller and sets the gamepad connected listener
+ * Should be called after setting up the game's new controller listeners
+ */
 export function initControllers() {
 	if (!Utils.mobileAndTabletCheck()) {
 		for (const keyboard of DefaultKeyboardControls) {
@@ -576,9 +687,15 @@ export function initControllers() {
 	});
 }
 
-
+/**
+ * The last used controller. Stored for single player games, where multiple input methods are used as the same controller
+ * @type {Controller}
+ */
 let lastUsedController = null;
-/** @param {Controller} controller */
+/** 
+ * Sets the controller passed as the parameter to be the last one used 
+ * @param {Controller} controller
+ */
 export function lastUsed(controller) {
 	if (lastUsedController !== null && lastUsedController._id === controller._id)
 		return;
@@ -603,8 +720,7 @@ export function lastUsed(controller) {
 
 
 
-
-// ------ MOUSE START ------
+// ------------ MOUSE START ------------
 export const Mouse = (function() {
 	const Mouse = {
 		position: Vector2.zero,
@@ -655,6 +771,4 @@ export const Mouse = (function() {
 
 	return Mouse;
 }());
-
-
-// ------ MOUSE END ------
+// ------------ MOUSE END ------------

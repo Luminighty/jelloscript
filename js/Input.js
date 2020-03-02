@@ -96,7 +96,7 @@ const TouchInputs = [
 	}
 ];
 
-addTouchInput(TouchInputs);
+addTouchInput(TouchInputs, Buttons, Axes);
 
 /**
  * Gravity: The speed the axis will fall back to 0

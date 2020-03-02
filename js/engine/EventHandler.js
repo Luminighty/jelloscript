@@ -1,3 +1,6 @@
+/**
+ * Similarly to the Events in Node.js this class stores typed listeners with any number of arguments
+ */
 export default class EventHandler {
 
 	constructor() {
@@ -36,6 +39,7 @@ export default class EventHandler {
 	 */
 
 	/**
+	 * Iterates through the listeners and passes them as parameters for the callback
 	 * @param {String} type 
 	 * @param {ForeachCallback} callback 
 	 */

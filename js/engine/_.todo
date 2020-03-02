@@ -1,3 +1,15 @@
+Documentation:
+	✔ InputManager.js @done (2020. 03. 02. 18:55:25)
+	✔ Controller.js @done (2020. 03. 02. 18:55:29)
+	✔ EventHandler.js @done (2020. 03. 02. 19:01:38)
+	✔ Networking.js @done (2020. 03. 02. 19:15:05)
+		✔ NetworkController @done (2020. 03. 02. 19:15:06)
+		✔ NetworkManager @done (2020. 03. 02. 19:15:06)
+	✔ jelloLobby.js @done (2020. 03. 02. 19:30:31)
+	☐ Update docs
+		☐ Add new classes
+
+
 Planned:
 	☐ Mobile support @high 
 		✔ Render buttons @done (2019. 10. 27. 20:04:48)
