@@ -1,4 +1,4 @@
-import {Controller, OnNewControllerListener, foreachController} from "./Controller";
+import {Controller, OnNewControllerListener, foreachController, SetControllerState, GetControllerState} from "./Controller";
 import {networkConfig, axisConfig} from "../Input";
 import { Axis, Button } from "./InputManager";
 import EventHandler from "./EventHandler";
@@ -10,13 +10,15 @@ socket.on("connect", () => {
 	console.log("connected");
 });
 
+
 /**
  * A remote player representation for a controller
  */
 class NetworkController extends Controller {
-	constructor(buttons, axes, type, id) {
+	constructor(buttons, axes, type, id, data) {
 		super(buttons, axes, false);
 		this.networkId = id;
+		NetworkController.networkToIdMap[this.networkId] = this.id;
 		/** @type {Number} */
 		this._type = type;
 		for (const key in buttons) {
@@ -56,6 +58,8 @@ class NetworkController extends Controller {
 
 }
 
+NetworkController.networkToIdMap = {};
+
 /** Converts the inputs to only have their states */
 function inputToValues(inputs) {
 	/** @type {Object.<string, number>} */
@@ -85,7 +89,8 @@ function addController(inputs, id, type, isLocal) {
 		return;
 	
 	const {axes, buttons} = inputToValues(inputs);
-	socket.emit("new controller", {axes, buttons, id, type});
+	const data = GetControllerState(id);
+	socket.emit("new controller", {axes, buttons, id, type, data});
 	inputs.Controller.onInputReceived((key, state, isButton) => {
 		socket.emit("update controller", id, key, state, isButton);
 	});
@@ -188,8 +193,9 @@ socket.on("new connection", () => {
 	console.log("New connection");
 });
 
-socket.on("new controller", (buttons, axes, type, id) => {
-	new NetworkController(buttons, axes, type, id);
+socket.on("new controller", (buttons, axes, type, id, data) => {
+	new NetworkController(buttons, axes, type, id, data);
+	SetControllerState(NetworkController.networkToIdMap[id], data);
 });
 
 socket.on("get controllers", () => {
@@ -207,6 +213,26 @@ function onLobbiesRefreshed(callback) {
 	events.on("lobby refresh", callback);
 }
 
+socket.on("get controller state", (id, response) => {
+	console.log("get controller state", id);
+	
+	const data = GetControllerState(id);
+	response(data);
+});
+
+socket.on("messaging", (type, args) => {
+	events.call(`messaging ${type}`, ...args);
+});
+
+function sendMessage(type, ...args) {
+	//events.call(`messaging ${type}`, ...args);
+	socket.emit("messaging", type, args);
+}
+
+function onMessage(type, callback) {
+	events.on(`messaging ${type}`, callback);
+}
+
 const NetworkManager = {
 	host,
 	connect,
@@ -215,6 +241,8 @@ const NetworkManager = {
 	setStateGetter,
 	setStateSetter,
 	updateState,
+	onMessage,
+	sendMessage,
 	/** @type {Lobby[]} */
 	lobbies: []
 };

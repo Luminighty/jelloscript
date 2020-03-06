@@ -96,9 +96,9 @@ export class Controller {
 		}
 		controllers[this.id] = this;
 
-		newControllerHandler.forEach("default", (listener) => {
-			listener(this.input, this.id, this.type, this.isLocal);
-		});
+
+		newControllerHandler.call("default", this.input, this.id, this.type, this.isLocal);
+
 	}
 
 	/** 
@@ -639,6 +639,48 @@ const newControllerHandler = new EventHandler();
  */
 export function OnNewControllerListener(listener) {
 	newControllerHandler.on("default", listener);
+}
+
+/**
+ * @callback ControllerStateSetter
+ * @param {any} data
+ */
+/**
+ * @callback ControllerStateGetter
+ * @return {any} data
+ */
+
+/**
+ * Called when setting the state for a controller
+ * @param {string} id Controller Id
+ * @param {ControllerStateSetter} callback 
+ */
+export function OnSetControllerState(id, callback) {
+	controllers[id].stateSetter = callback;
+}
+
+/**
+ * Called when requesting the state of a controller
+ * @param {string} id Controller Id
+ * @param {ControllerStateGetter} callback 
+ */
+export function OnGetControllerState(id, callback) {
+	controllers[id].stateGetter = callback;
+}
+
+/** Calls the Controller Getter and returns the results */
+export function GetControllerState(id) {
+	const contr = controllers[id];
+	if (contr && contr.stateGetter)
+		return contr.stateGetter();
+	return {};
+}
+
+/** Calls the Controller Setter */
+export function SetControllerState(id, data) {
+	const contr = controllers[id];
+	if (contr && contr.stateSetter)
+		contr.stateSetter(data);
 }
 
 /**

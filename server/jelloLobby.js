@@ -48,8 +48,10 @@ function onConnect(socket) {
 				const contr = currentLobby.controllers[id];
 				if (contr.socketId == socket.id)
 					continue;
-				log(`Adding new controller ${contr.id}`);
-				socket.emit("new controller", contr.buttons, contr.axes, contr.type, contr.id);
+				contr.socket.emit("get controller state", contr.localId, (data) => {
+					log(`Adding new controller ${contr.id}`);
+					socket.emit("new controller", contr.buttons, contr.axes, contr.type, contr.id, data);
+				});
 			}
 		}
 	};
@@ -92,7 +94,7 @@ function onConnect(socket) {
 		log("Connected a new controller");
 		const contr = new Controller(socket, controller);
 		currentLobby.addController(contr);
-		socket.to(currentLobby.roomName).emit("new controller", contr.buttons, contr.axes, contr.type, contr.id);
+		socket.to(currentLobby.roomName).emit("new controller", contr.buttons, contr.axes, contr.type, contr.id, controller.data);
 	});
 
 	socket.on("update controller", (id, key, value, isButton) => {
@@ -108,6 +110,14 @@ function onConnect(socket) {
 		input[key] = value;
 		socket.to(currentLobby.roomName).emit("update controller", controller.id, key, value, isButton);
 	});
+
+	socket.on("messaging", (type, args) => {
+		if (currentLobby == null)
+			return;
+		socket.to(currentLobby.roomName).emit("messaging", type, args);
+		if (currentLogLevel >= 2)
+			log(`Received Message ${type}: ${args}`);
+	});
 }
 
 class Controller {
@@ -118,6 +128,8 @@ class Controller {
 	constructor(socket, controller) {
 		this.socketId = socket.id;
 		this.id = Controller.toId(socket, controller.id);
+		this.localId = controller.id;
+		this.socket = socket;
 		this.type = controller.type;
 		this.buttons = controller.buttons;
 		this.axes = controller.axes;

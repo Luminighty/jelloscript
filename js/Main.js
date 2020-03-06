@@ -9,6 +9,9 @@ import NetworkManager from "./engine/Networking";
 
 document.title = "Test Game";
 
+window.players = [];
+
+
 window.main = main(() => {
 	//console.log("Hello World");
 	
@@ -17,7 +20,20 @@ window.main = main(() => {
 		GameObject.init(new Grass(i*16,j*16, "NORMAL"), 0);
 	
 	Input.OnNewControllerListener((input, id) => {
-		GameObject.init(new Player(input), 1000);
+		const player = new Player(input);
+		window.players.push(player);
+		Input.OnGetControllerState(id, () => {
+			console.log("GetControllerState()");
+			console.log(player.position);
+			return player.localPosition;
+		});
+		Input.OnSetControllerState(id, (data) => {
+			console.log(data);
+			
+			if (data)
+				player.localPosition = data;
+		});
+		GameObject.init(player, 1000);
 	});
 
 	//GameObject.init(new Player(), 1000);

@@ -24,7 +24,7 @@ export const DefaultKeyboardControls = [
 			Horizontal: AxisKeys("ArrowRight", "ArrowLeft"),
 			Vertical:   AxisKeys("ArrowDown"   , "ArrowUp")
 		}
-	},
+	},/*
 	{
 		Buttons: {
 			A: "KeyF",
@@ -34,7 +34,7 @@ export const DefaultKeyboardControls = [
 			Horizontal: AxisKeys("KeyD", "KeyA"),
 			Vertical:   AxisKeys("KeyS"   , "KeyW")
 		}
-	}
+	}*/
 ];
 
 /** @typedef {GamepadControls} GamepadControls */
@@ -139,4 +139,4 @@ export const networkConfig = {
 
 
 // Re-exporting for easier access
-export {Mouse, FromPlayer, OnNewControllerListener} from "./engine/Controller";
+export {Mouse, FromPlayer, OnNewControllerListener, OnGetControllerState, OnSetControllerState} from "./engine/Controller";

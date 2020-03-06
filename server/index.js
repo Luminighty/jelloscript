@@ -10,10 +10,10 @@ const HOST = 'localhost';
 server.listen(PORT, HOST, () => {
 	console.log(`Listening on ${PORT}`);
 	console.log(`http://${HOST}:${PORT}/`);		
-	jello.init(server);
+	jello.init(server, jello.logLevels.All);
 });
 
-app.use(express.static("..", {extensions: ['html', 'js']}));
+app.use(express.static(`${__dirname}/..`, {extensions: ['html', 'js']}));
 /*
 http.listen(PORT, function(){
 	console.log('listening on *:3000');
