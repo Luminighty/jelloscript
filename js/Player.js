@@ -7,6 +7,7 @@ import Animator from "./engine/Animator";
 import BoxCollider from './engine/BoxCollider';
 import { colliderTags } from './Config';
 import Camera from './engine/Camera';
+import { ParticleSystem, Particle } from "./engine/ParticleSystem";
 
 class PlayerAnimator extends Animator {
 	constructor(gameObject) {
@@ -48,11 +49,12 @@ export default class Player extends GameObject {
 		this.anim = this.addComponent(new PlayerAnimator());
 		this.addComponent(new BoxCollider(colliderTags.player, [6,6], [0,1]));
 		this.addComponent(new Camera());
+
 		sounds.MUSIC.test.volume = 0.1;
 
  		/** @type {import("./engine/InputManager").Inputs} input */
 		this.input = input;
-		this.input.Buttons.A.onPressed(this.onShoot);
+		this.input.Buttons.A.onPressed(() => {this.onShoot();} );
 		this.input.Buttons.B.onPressed(this.onB);
 		this.input.Buttons.A.onReleased(() => {
 			//console.log("A released");
@@ -60,10 +62,30 @@ export default class Player extends GameObject {
 		this.input.Buttons.B.onReleased(() => {
 			//console.log("B released");
 		});
+
+
+		this.particle = new Particle({
+			velocity: [0, -1],
+			gravity: [0.05, 0.05],
+			sprite: sprites.flame,
+			lifespan: 50,
+			renderingLayer: 1000,
+			spriteAlpha: (per) => {
+				//console.log(per);
+				return 1-per;
+			} 
+		});
+		/** @type {ParticleSystem} */
+		this.particles = this.addComponent(new ParticleSystem({
+			particles: [this.particle],
+			delay: 0,
+			spawnOffset: [5, 0]
+		}));
 	}
 
 	onShoot() {
 		//console.log("A pressed");
+		this.particles.enabled = !this.particles.enabled;
 	}
 
 	onB() {
@@ -77,6 +99,8 @@ export default class Player extends GameObject {
 
 		this.anim.move = new Vector2(horizontal, vertical);
 		
+		this.particle.gravity.x = (Math.random() * 2 - 1) * 0.05;
+		this.particle.gravity.y = Math.random() * 0.2;
 		//console.log(`${horizontal} - ${vertical}`);
 		
 

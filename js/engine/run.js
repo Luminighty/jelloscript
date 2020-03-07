@@ -116,6 +116,7 @@ function Draw(canvas, tick) {
 			canvas.restore();
 		} catch (error) {
 			console.error(error);
+			throw new Error(error);
 		}
 	}
 }
@@ -151,7 +152,7 @@ function setCanvasSize() {
 		newSize.x = toMultiplier(newSize.x, canvasSize.x, 0.5);
 		newSize.y = toMultiplier(newSize.y, canvasSize.y, 0.5);
 	}
-	console.log(newSize);
+	//console.log(newSize);
 	
 	canvasElement.style.height = `${newSize.y}px`;
 	canvasElement.style.width = `${newSize.x}px`;

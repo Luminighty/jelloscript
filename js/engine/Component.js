@@ -1,5 +1,6 @@
 /* jshint expr: true */
 import GameObject from "./GameObject";
+import {gameObjects} from "./GameObject";
 
 let currentId = 0;
 

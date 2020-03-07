@@ -18,5 +18,6 @@ export const sprites = {
                         "WET": {x:0, y:6}
 					}),
 	player: new Sprite("./media/player.png", [8,8], [1,0]),
-	water: new Sprite("./media/water.png", [16,16])
+	water: new Sprite("./media/water.png", [16,16]),
+	flame: new Sprite("./media/flame.png", [4,4]),
 };

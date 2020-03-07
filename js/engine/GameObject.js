@@ -65,7 +65,8 @@ export default class GameObject extends Component {
 		this.gameObject = this;
 	}
 
-	/** Adds a new component to the component array
+	/** 
+	 * Adds a new component to the component array
 	 * @returns {Component} the new component
 	 */
 	addComponent(component) { 
@@ -121,7 +122,8 @@ export default class GameObject extends Component {
 	tick(tick) {
 		this.update(tick);
 		for (const component of this.components)
-			component.update(tick);
+			if (component.enabled)
+				component.update(tick);
 	}
 
 	/**
@@ -246,12 +248,16 @@ export default class GameObject extends Component {
 	/** @public */
 	set spriteFlipY(value)  {this._spriteFlip.y = value;}
 
-	/** @public */
-	static init(object, layer = 100) {
+	/** @public
+	 * @param {GameObject} object
+	 * @param {Number} layer
+	 */
+	static init(object, layer = 0) {
 		 if (gameObjects[layer] == null)
 			gameObjects[layer] = [];
 		object.updateLayer = layer;
 		gameObjects[layer].push(object);
+		return object;
 	}
 
 	/** Shorthand for GameObject.destroy(this, delay); */
