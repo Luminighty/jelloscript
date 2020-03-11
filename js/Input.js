@@ -57,7 +57,7 @@ export const DefaultGamepadControls = {
  * @property {string} image The path to the button's or axis' image
  * @property {string} css The css the element will have
  */
-const TouchInputs = [
+export const TouchInputs = [
 	{
 		type: "Axis",
 		key: ["Horizontal", "Vertical"],
@@ -96,7 +96,6 @@ const TouchInputs = [
 	}
 ];
 
-addTouchInput(TouchInputs, Buttons, Axes);
 
 /**
  * Gravity: The speed the axis will fall back to 0

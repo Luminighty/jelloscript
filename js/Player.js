@@ -65,21 +65,21 @@ export default class Player extends GameObject {
 
 
 		this.particle = new Particle({
-			velocity: [0, -1],
-			gravity: [0.05, 0.05],
+			position: () => ([Math.random() * 6 - 3, 3]),
+			velocity: () => ([0, Math.random()]),
+			gravity: () => ([Math.random() * 0.1 - 0.05, 0.05]),
 			sprite: sprites.flame,
 			lifespan: 50,
 			renderingLayer: 1000,
-			spriteAlpha: (per) => {
-				//console.log(per);
-				return 1-per;
-			} 
+			spriteAlpha: 1
+		});
+		this.particle.onUpdate((particle) => {
+			particle.spriteAlpha = 1-particle.lifePercent;
 		});
 		/** @type {ParticleSystem} */
 		this.particles = this.addComponent(new ParticleSystem({
 			particles: [this.particle],
-			delay: 0,
-			spawnOffset: [5, 0]
+			delay: 0
 		}));
 	}
 
@@ -99,8 +99,6 @@ export default class Player extends GameObject {
 
 		this.anim.move = new Vector2(horizontal, vertical);
 		
-		this.particle.gravity.x = (Math.random() * 2 - 1) * 0.05;
-		this.particle.gravity.y = Math.random() * 0.2;
 		//console.log(`${horizontal} - ${vertical}`);
 		
 
@@ -110,9 +108,10 @@ export default class Player extends GameObject {
 		this.position = pos;
 		if (horizontal != 0)
 			this.spriteFlipX = horizontal < 0;
-
+		/*
 		if (Input.Buttons.A.isPressed)
 			sounds.SOUND.test.playOnce();
+			*/
 	}
 
 }

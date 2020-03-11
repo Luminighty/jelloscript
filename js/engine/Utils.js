@@ -73,23 +73,15 @@ export function mobileAndTabletCheck() {
 	return check;
 }
 
-
-export class ValueGetter {
-	constructor(value) {
-		this._value = value;
+/**
+ * Wraps the value in a function, or makes the function be it's getter
+ * @param {Any|Function} value 
+ * @param {Any} defaultValue if value is undefined
+ * @returns {Function}
+ */ 
+export function asFunction(value, defaultValue) {
+	if (typeof(value) == "function") {
+		return value;
 	}
-
-	set value(value) {this._value = value;}
-	get value() {return value;}
-}
-
-export class IntervalGetter extends ValueGetter {
-	constructor(min, max) {
-		this.min = min;
-		this.dif = max - min;
-	}
-
-	get value() {
-		return Math.random() * this.dif + this.min;
-	}
+	return (value != null) ? () => value : () => defaultValue;
 }

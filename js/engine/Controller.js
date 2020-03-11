@@ -495,9 +495,10 @@ class TouchController extends Controller {
 	constructor(layout, buttons, axes) {
 		super(buttons, axes);
 		this.layout = layout;
+		this.setTouchListeners();
 	}
 
-	setListeners() {
+	setTouchListeners() {
 
 		/** @param {HTMLImageElement} element 
 		 * @param {TouchController} controller
@@ -711,11 +712,13 @@ export function addTouchInput(layoutConfig, buttons, axes, onlyPhone = true) {
  * Initializes every keyboard controller and sets the gamepad connected listener
  * Should be called after setting up the game's new controller listeners
  */
-export function initControllers() {
+export function initControllers(touchInputs, buttons, axes, onlyPhone) {
 	if (!Utils.mobileAndTabletCheck()) {
 		for (const keyboard of DefaultKeyboardControls) {
 			new KeyboardController(keyboard.Buttons, keyboard.Axes);
 		}
+	} else {
+		addTouchInput(touchInputs, buttons, axes, onlyPhone);
 	}
 
 	window.addEventListener("gamepadconnected", (e) => {

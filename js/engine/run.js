@@ -6,6 +6,7 @@ import { Vector2 } from './Struct';
 import GameObject, {gameObjects} from './GameObject';
 import { currentDebugs } from "./Debug";
 import Camera from "./Camera";
+import { Axes, Buttons, TouchInputs } from "../Input";
 
 function $(query) {return document.querySelector(query);}
 function $$(query) {return document.querySelectorAll(query);}
@@ -32,7 +33,7 @@ export function main(onStart) {
 	canvas.save();
 
 	onStart();
-	initControllers();
+	initControllers(TouchInputs, Buttons, Axes);
 
 	return setInterval(() => {
 		Update(tick);

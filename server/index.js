@@ -4,8 +4,8 @@ const express = require("express");
 const app = express();
 var server = require('http').Server(app);
 
-const PORT = 12345;
-const HOST = 'localhost';
+const PORT = 80;
+const HOST = '192.168.0.165';
 
 server.listen(PORT, HOST, () => {
 	console.log(`Listening on ${PORT}`);
