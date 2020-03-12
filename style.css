@@ -8,7 +8,7 @@ html {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-	background-color: white;
+	background-color: rgb(0, 10, 20);
 }
 
 

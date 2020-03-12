@@ -6,7 +6,7 @@ export const canvasConfig = {
 	/** The query used for finding the canvas */
 	canvasQuery: "#mainCanvas",
 	/** Canvas size in pixels */
-	size: {x: 320, y: 180},
+	size: {x: 640, y: 360},
 	/** Canvas ratio */
 	ratio: {x: 16, y: 9},
 	/** How much does the canvas fill of the screen in percentage */

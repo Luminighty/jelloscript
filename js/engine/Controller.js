@@ -524,12 +524,18 @@ class TouchController extends Controller {
 					delta = delta.normalized;
 				horizontal.state = delta.x;
 				vertical.state = delta.y;
+				
+				horizontal.callListener(Axis.listenerTypes.Changed, horizontal.state);
+				vertical.callListener(Axis.listenerTypes.Changed, vertical.state);
 			});
 			
 			element.addEventListener("touchend", (e) => {
 				e.preventDefault();
 				horizontal.state = 0;
 				vertical.state = 0;
+				
+				horizontal.callListener(Axis.listenerTypes.Changed, horizontal.state);
+				vertical.callListener(Axis.listenerTypes.Changed, vertical.state);
 			});
 		};
 
@@ -567,6 +573,8 @@ class TouchController extends Controller {
 			addListener(this, element, touchInput.key);
 		}
 	}
+
+	updateAxis(axis) {}
 
 	/**
 	 * Returns InputMethods.TOUCH

@@ -1,11 +1,12 @@
 import { main } from "./engine/run";
 import GameObject from './engine/GameObject';
-import { sounds } from "./Assets";
+import { sounds, sprites } from "./Assets";
 import Player from './Player';
-import Grass from "./Grass";
-import Water from './Water';
 import * as Input from "./Input";
 import NetworkManager from "./engine/Networking";
+import { ParticleSystem, Particle } from "./engine/ParticleSystem";
+import { Vector2 } from "./engine/Struct";
+import * as Utils from "./engine/Utils";
 
 document.title = "Test Game";
 
@@ -13,34 +14,47 @@ window.players = [];
 
 
 window.main = main(() => {
-	//console.log("Hello World");
-	
-	for(let i = 0; i < 25; i++) 
-	for(let j = 0; j < 15; j++)
-		GameObject.init(new Grass(i*16,j*16, "NORMAL"), 0);
 	
 	Input.OnNewControllerListener((input, id) => {
 		const player = new Player(input);
-		window.players.push(player);
 		Input.OnGetControllerState(id, () => {
-			console.log("GetControllerState()");
-			console.log(player.position);
-			return player.localPosition;
+			return {position: player.localPosition, color: player.shipColor};
 		});
+
 		Input.OnSetControllerState(id, (data) => {
-			console.log(data);
-			
-			if (data)
-				player.localPosition = data;
+			if (data) {
+				player.localPosition = data.position;
+				player.shipColor = data.color;
+			}
 		});
-		GameObject.init(player, 1000);
+		GameObject.init(player, 10);
 	});
 
-	//GameObject.init(new Player(), 1000);
-	GameObject.init(new Water(30,30));
-	//sounds.MUSIC.test.play();
-
+	InitStarParticles();
 });
+
+
+function InitStarParticles() {
+	const holder = GameObject.init(new GameObject(), 0);
+	const particle = new Particle({
+		position: () => [Math.random() * 640, -5],
+		velocity: () => [0, Math.random() * 0.3 + 0.5],
+		gravity: Vector2.zero,
+		sprite: sprites.stars,
+		spriteRect: () => {
+			const value = Utils.decide([100, 10, 1]);
+			return sprites.stars.getSpriteRect(value, 0);
+			},
+		lifespan: 1000,
+		renderingLayer: 0,
+	});
+
+	const particleSystem = new ParticleSystem({
+		particles: [particle],
+		delay: 10
+	}, true);
+	holder.addComponent(particleSystem);
+}
 
 
 let lobbies = [];
@@ -60,7 +74,10 @@ window.connectLobby = function(id) {
 	NetworkManager.connect(lobbies[id]);
 };
 
-window.hostLobby = NetworkManager.host;
+window.hostLobby = () => {
+	NetworkManager.host();
+	console.log("Hosting...");
+};
 window.refreshLobbies = NetworkManager.refreshLobbies;
 
 /*

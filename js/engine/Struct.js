@@ -146,6 +146,24 @@ export class Vector2 {
 	}
 	
 	/**
+	 * Returns a new vector made out of the minimum of both vector's components
+	 * @param {Vector2} a 
+	 * @param {Vector2} b 
+	 */
+	static min(a, b) {
+		return new Vector2(Math.min(a.x, b.x), Math.min(a.y, b.y));
+	}
+	
+	/**
+	 * Returns a new vector made out of the maximum of both vector's components
+	 * @param {Vector2} a 
+	 * @param {Vector2} b 
+	 */
+	static max(a, b) {
+		return new Vector2(Math.max(a.x, b.x), Math.max(a.y, b.y));
+	}
+
+	/**
 	 * Checks whenever two vector are equal
 	 * @param {Rect} other 
 	 * @returns {Boolean}

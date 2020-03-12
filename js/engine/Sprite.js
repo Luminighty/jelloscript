@@ -5,9 +5,9 @@ export default class Sprite extends Resource {
         
     /**
      * @param {String} path Physical file path
-     * @param {Array} size [Width, Height] 
-     * @param {Array} offset [OffsetX, OffsetY] 
-     * @param {Array} pivot [PivotX, PivotY] 
+     * @param {[Number, Number]} size [Width, Height] 
+     * @param {[Number, Number]} offset [OffsetX, OffsetY] default: [0, 0]
+     * @param {[Number, Number]} pivot [PivotX, PivotY] default: [0.5, 0.5]
      * @param {dictionary} labels {"LABELNAME" : {x: OffsetX, y: OffsetY}, ...}
      * Offset as tiles, NOT PIXELS
      */
@@ -59,13 +59,13 @@ export default class Sprite extends Resource {
 	 * @public
 	 * Get a sprite from the sprite sheet using the label
 	 * @param {SpriteLabel} label
-	 * @param {Number} offsetX 
-	 * @param {Number} offsetY 
+	 * @param {Number} offsetX Tile offset
+	 * @param {Number} offsetY Tile offset
 	 * @returns {Rect}
 	 */
     getSpriteFromLabel(label, offsetX=0, offsetY=0) {
         const l = this.labels[label.toUpperCase()];
-        return this.getSpriteRect(l.x+offsetX, l.y+offsetY);
+		return this.getSpriteRect(l.x+offsetX, l.y+offsetY);
     }
 
     /** @type {HTMLImageElement} */

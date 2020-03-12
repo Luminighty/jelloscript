@@ -64,7 +64,7 @@ export const TouchInputs = [
 		image: "./media/input/axis.png",
 		css: `
 			left: 100px;
-			bottom: 100px;
+			bottom: 50px;
 			position: absolute;
 			background-color: #ffffff3d;
 			border-radius: 9999px;
@@ -109,18 +109,18 @@ export const TouchInputs = [
 export const axisConfig = {
 	0: {	// Gamepad
 		dead: 0.15,
-		minimumChange: 0.005,
+		minimumChange: 0.001,
 	},
 	1: {	// Keyboard
 		gravity: 0.3,
 		sensivity: 0.5,
 		dead: 0.1,
-		minimumChange: 0.005,
+		minimumChange: 0.001,
 	},
 	2: {	// Touch
 		dead: 0.1,
 		radius: 50,
-		minimumChange: 0.005,
+		minimumChange: 0.001,
 	}
 };
 
