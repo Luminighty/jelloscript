@@ -1,6 +1,6 @@
 {
-	"short_name": "JSGame",
-	"name": "JSGame",
+	"short_name": "Spaceships",
+	"name": "Spaceships",
 	"icons": [
 		{
 			"src": "./media/icons/icons-192.png",
@@ -15,8 +15,8 @@
 	],
 	"theme_color": "#000030",
 	"background_color": "#000030",
-	"start_url": "./index.html",
-	"display": "standalone",
+	"start_url": "index.html",
+	"display": "fullscreen",
 	"orientation": "landscape",
 	"scope": "./"
   }

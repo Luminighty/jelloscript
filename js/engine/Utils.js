@@ -2,18 +2,18 @@ import { Vector2 } from "./Struct";
 
 /**
  * A random selection based on the chances array.
- * @param {[Number]} chances The chances of one of them being the outcome [10,30,20]
+ * @param {[Number]} weights The chances of one of them being the outcome [10,30,20]
  * @param {[Any]} options The results of the chances, by default it's 0..chances.length-1
  * @returns {Any} An element of options or an index of chances
  */
-export function decide(chances, options = []) {
+export function decide(weights, options = []) {
 	let sum = 0;
-	for (const c of chances)
+	for (const c of weights)
 		sum += c;
 	let res = Math.random() * sum;
 	
-	for (let i = 0; i < chances.length; i++) {
-		const element = chances[i];
+	for (let i = 0; i < weights.length; i++) {
+		const element = weights[i];
 		res -= element;
 		if (res <= 0)
 			return (options.length <= i || options == []) ? i : options[i];

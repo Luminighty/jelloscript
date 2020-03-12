@@ -8,15 +8,16 @@ import { ParticleSystem, Particle } from "./engine/ParticleSystem";
 import { Vector2 } from "./engine/Struct";
 import * as Utils from "./engine/Utils";
 
-document.title = "Test Game";
+document.title = "Spaceships";
 
 window.players = [];
 
+const playerColor = null;
 
 window.main = main(() => {
 	
 	Input.OnNewControllerListener((input, id) => {
-		const player = new Player(input);
+		const player = new Player(input, playerColor);
 		Input.OnGetControllerState(id, () => {
 			return {position: player.localPosition, color: player.shipColor};
 		});

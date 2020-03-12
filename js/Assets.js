@@ -1,16 +1,6 @@
 import Sound from "./engine/Sound";
 import Sprite from "./engine/Sprite";
 
-
-export const sounds = {
-	MUSIC: {
-		test: new Sound("./media/magicka.wav", true)
-	},
-	SOUND: {
-		test: new Sound("./media/sound.wav")
-	}
-};
-
 export const sprites = {
     grass: new Sprite("./media/temp/grass.png", [16,16], [0,0], [0.5, 0.5], {
                         "DRY": {x:0, y:0},
@@ -26,9 +16,20 @@ export const sprites = {
 		"GREEN":  {x: 2, y: 0},
 	}),
 	stars: new Sprite("./media/stars.png", [8,8]),
-	thruster: new Sprite("./media/thurster.png", [8, 24], [0,0], [0.5, 0], {
+	thruster: new Sprite("./media/thruster.png", [8, 24], [0,0], [0.5, 0], {
 		"NORMAL": {x: 0, y: 0},
 		"BACK":   {x: 1, y: 0},
 		"FORWARD":{x: 2, y: 0},
 	}),
+};
+
+export const sounds = {
+	MUSIC: {
+		test: new Sound("./media/temp/magicka.wav", true),
+	},
+	SOUND: {
+		temp: { test: new Sound("./media/temp/sound.wav"), },
+		shoot: new Sound("./media/shoot.wav"),
+		wrong: new Sound("./media/wrong.wav"),
+	}
 };

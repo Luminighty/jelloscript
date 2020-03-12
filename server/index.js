@@ -5,12 +5,14 @@ const app = express();
 var server = require('http').Server(app);
 
 const PORT = 80;
+//const HOST = 'localhost';
 const HOST = '192.168.0.165';
+const jelloLog = jello.logLevels.All;
 
 server.listen(PORT, HOST, () => {
 	console.log(`Listening on ${PORT}`);
 	console.log(`http://${HOST}:${PORT}/`);		
-	jello.init(server, jello.logLevels.All);
+	jello.init(server, jelloLog);
 });
 
 app.use(express.static(`${__dirname}/..`, {extensions: ['html', 'js']}));

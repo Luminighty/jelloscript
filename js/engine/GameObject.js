@@ -127,7 +127,6 @@ export default class GameObject extends Component {
 	}
 
 	/**
-	 * @public
 	 * @type {Vector2}
 	 */
 	get position() {
@@ -260,7 +259,10 @@ export default class GameObject extends Component {
 		return object;
 	}
 
+
 	/** Shorthand for GameObject.destroy(this, delay); */
 	destroy(delay = 0) { GameObject.destroy(this, delay); }
 
 }
+/** The current tick since the game started */
+GameObject.tick = 0;

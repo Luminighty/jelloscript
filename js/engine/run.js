@@ -46,6 +46,7 @@ export function main(onStart) {
 }
 
 function Update(tick) {
+	GameObject.tick = tick;
 	for (let layer of gameObjects)
 	if (layer != null)
 	for (const gameObject of layer)
@@ -171,12 +172,4 @@ function toMultiplier(value, to, divider) {
 	return value - (value % to);
 }
 
-
-
-if ('serviceWorker' in navigator) {
-	navigator.serviceWorker.register('service-worker.js')
-	  .catch(function(err) {
-		console.error(err);
-	});
- }
 

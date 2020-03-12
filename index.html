@@ -7,7 +7,10 @@
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="mobile-web-app-capable" content="yes">
 	<link rel="manifest" href="./manifest.json">
+	<meta name="theme-color" content="#000030"/>
+	<link rel="apple-touch-icon" href="media/icons/icons-192.png">
     <link rel="stylesheet" href="style.css">
+	<link rel="icon" sizes="16x16 32x32 64x64" href="/favicon.ico">
     <title></title>
 </head>
 <body>
@@ -23,9 +26,8 @@
 	<div id="btn-connect">CONNECT</div>
 
 	<script src="/socket.io/socket.io.js"></script>
-	<script>
-		window.io = io;
-	</script>
+	<script> window.io = io; </script>
 	<script type="module" src="./js/Main.js"></script>
+	<script src="install.js"></script>
 </body>
 </html>
