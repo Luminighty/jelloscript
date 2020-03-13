@@ -1,5 +1,5 @@
 import Resource from "./Resource";
-import { Vector2 } from "./Struct";
+import { Vector2, Rect } from "./Struct";
 
 export default class Sprite extends Resource {
         

@@ -1,6 +1,7 @@
 /* jshint expr: true */
 import GameObject from "./GameObject";
 import {gameObjects} from "./GameObject";
+//import Collider from "./Collider";
 
 let currentId = 0;
 
@@ -65,33 +66,33 @@ export default class Component {
 
 	/**
 	 * Called when the gameobject starts colliding with another collider
-	 * @param {Collider} other 
+	 * @param {import("./Collider").Collider} other 
 	 */
 	onCollisionEnter(other) {}
 	/**
 	 * Called every frame when the gameobject collides with another collider
-	 * @param {Collider} other 
+	 * @param {import("./Collider").Collider} other 
 	 */
 	onCollisionStay(other) {}
 	/**
 	 * Called when the gameobject stops colliding with another collider
-	 * @param {Collider} other 
+	 * @param {import("./Collider").Collider} other 
 	 */
 	onCollisionExit(other) {}
 
 	/**
 	 * Called when the attached gameobject enters a trigger
-	 * @param {Collider} other 
+	 * @param {import("./Collider").Collider} other 
 	 */
 	onTriggerEnter(other) {}
 	/**
 	 * Called every frame when the attached gameobject is in a trigger
-	 * @param {Collider} other 
+	 * @param {import("./Collider").Collider} other 
 	 */
 	onTriggerStay(other) {}
 	/**
 	 * Called when the attached gameobject leaves a trigger
-	 * @param {Collider} other 
+	 * @param {import("./Collider")} other 
 	 */
 	onTriggerExit(other) {}
 
@@ -104,8 +105,12 @@ export default class Component {
 	static destroy(object, delay=0) {
 		const gameObject = object.gameObject;
 		const des = function() {
+			if (toDestoryObjects[gameObject.id])
+				clearInterval(toDestoryObjects[gameObject.id]);
+			delete toDestoryObjects[gameObject.id];
 			const layer = gameObjects[gameObject.updateLayer];
 			layer.splice(layer.indexOf(gameObject), 1);
+			
 			for (const component of gameObject.components)
 				if (component != null)
 					component.onDestroy();
@@ -113,7 +118,7 @@ export default class Component {
 		};
 		if (delay <= 0) {
 			des();
-		} else { setTimeout(() => { des(); }, delay); }
+		} else { toDestoryObjects[gameObject.id] = setTimeout(() => { des(); }, delay); }
 	}
 
 	/**
@@ -128,3 +133,6 @@ export default class Component {
 		return objectA.equals(objectB);
 	}
 }
+
+/** @type {Object.<number, number>} */
+const toDestoryObjects = {};

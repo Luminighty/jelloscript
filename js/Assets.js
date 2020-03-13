@@ -20,7 +20,21 @@ export const sprites = {
 		"NORMAL": {x: 0, y: 0},
 		"BACK":   {x: 1, y: 0},
 		"FORWARD":{x: 2, y: 0},
+		"WIDE":   {x: 3, y: 0},
+		"THIN":   {x: 6, y: 0},
+		"NORMAL2":{x: 9, y: 0},
 	}),
+	missile: new Sprite("./media/missiles.png", [5, 8], [0,0], [0.5, 0], {
+		"PURPLE": {x: 0, y: 0},
+		"BLUE":   {x: 1, y: 0},
+		"GREEN":  {x: 2, y: 0},
+	}),
+	enemies: {
+		basic: new Sprite("./media/enemies_basic.png", [24, 24], [0,0], [0.5, 0.5], {
+			"BASIC": {x: 0, y: 0},
+			"SHOOT": {x: 1, y: 0},
+		}),
+	},
 };
 
 export const sounds = {

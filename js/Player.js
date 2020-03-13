@@ -6,6 +6,8 @@ import * as Utils from './engine/Utils';
 import BoxCollider from './engine/BoxCollider';
 import { colliderTags } from './Config';
 import Ship from './Ship';
+import Missile from './Missile';
+import Enemy from './Enemy';
 
 export default class Player extends Ship {
 	constructor(input, label, x=120, y=120) {
@@ -14,7 +16,7 @@ export default class Player extends Ship {
 		/** @type {Vector2} */
 		this.position = {x: x, y: y};
 		
-		this.addComponent(new BoxCollider(colliderTags.player, [6,6], [0,1]));
+		this.addComponent(new BoxCollider(colliderTags.player, [24,24], [0,0], false, true));
 
  		/** @type {import("./engine/InputManager").Inputs} input */
 		this.input = input;
@@ -28,26 +30,65 @@ export default class Player extends Ship {
 		switch (this.label) {
 			default:
 			case "PURPLE":
-				this.addThruster([-6, 21], [-9, 21], [0, 21]);
-				this.addThruster([6, 21], [0, 21], [9, 21]);
+				this.addThruster([-5, 21], [-6, 21], [-3, 21], "NORMAL2");
+				this.addThruster([6, 21], [4, 21], [7, 21], "NORMAL2");
 				break;
 			case "BLUE":
-				this.addThruster([0, 19], [0, 19], [0, 19]);
+				this.addThruster([0, 19], [-2, 19], [2, 19]);
 				break;
 			case "GREEN":
-				this.addThruster([0, 21], [0, 21], [0, 21]);
+				this.addThruster([0, 20], [-2, 20], [2, 20], "WIDE");
+				this.addThruster([-13, 20], [-14, 20], [-10, 20], "THIN");
+				this.addThruster([14, 20], [11, 20], [15, 20], "THIN");
 				break;
 		}
 	}
 
 
 	onShoot() {
+		if (this.health <= 0)
+			return;
 		if (this.shootDelay > 0) {
-			sounds.SOUND.wrong.playOnce();
+			sounds.SOUND.wrong.playOnce(0.1);
 			return;
 		}
-		this.shootDelay = 60;
-		sounds.SOUND.shoot.playOnce();
+		this.shootDelay = 15;
+		sounds.SOUND.shoot.playOnce(0.3);
+
+		this.spawnMissiles();
+	}
+
+	spawnMissiles() {
+		const positions = {
+			"PURPLE": {
+				"DEFAULT":[[-3.5, -14], [3.5, -14]],
+				"LEFT":   [[-5.5, -14], [0.5, -14]],
+				"RIGHT":  [[-0.5, -14], [5.5, -14]],
+			},
+			"GREEN": {
+				"DEFAULT":[[-8.5, 0], [8.5, 0]],
+				"LEFT":   [[-9.5, 0], [5.5, 0]],
+				"RIGHT":  [[-5.5, 0], [9.5, 0]],
+			},
+			"BLUE": {
+				"DEFAULT":[[-5.5, -8], [5.5, -8]],
+				"LEFT":   [[-7.5, -8], [3.5, -8]],
+				"RIGHT":  [[-3.5, -8], [7.5, -8]],
+			},
+		};
+
+
+
+		const move = this.move;
+		const way = (Math.abs(move.x) <= 0.2) ?
+				"DEFAULT" : 
+				(move.x < 0) ?
+					"LEFT" :
+					"RIGHT";
+
+		for (const pos of positions[this.label][way]) {
+			GameObject.init(new Missile(this.label, this, pos), 40);
+		}
 	}
 
 	onBack() {
@@ -71,6 +112,27 @@ export default class Player extends Ship {
 		this.position = pos;
 
 		this.shootDelay--;
+	}
+
+	onDeath() {
+		super.onDeath();
+	}
+
+
+	/**
+	 * @param {import('./engine/Collider').Collider} other 
+	 */
+	onTriggerEnter(other) {
+		if (other.gameObject instanceof Enemy) {
+			/** @type {Enemy} */
+			const enemy = other.gameObject;
+			
+			const dmg = Math.min(this.health, enemy.health);
+			enemy.hit(dmg);
+			this.hit(dmg);
+			console.table([this.health, enemy.health]);
+			
+		}
 	}
 
 }

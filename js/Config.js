@@ -25,7 +25,7 @@ export const canvasConfig = {
 export const debugMode = {
 	isDebugOn: true,
 	Collider: {
-		bounds: false
+		bounds: true
 	}
 };
 
@@ -37,12 +37,15 @@ export const debugMode = {
 
 /**
  * Possible collision tags
+ * @enum
  */
 export const colliderTags = {
 	default: "default",
 	background: "background",
 	player: "player",
-	wall: "wall"
+	playerMissile: "playerMissile",
+	missile: "missile",
+	enemy: "enemy",
 };
 
 /** The collision tags that will be ignored by the collision component */
@@ -51,11 +54,13 @@ export const colliderTags = {
  */
 export const collisionIgnoreMatrix = {
 	default: [colliderTags.background],
-	player: [colliderTags.player],
+	player: [colliderTags.player, colliderTags.playerMissile],
+	playerMissile: [colliderTags.playerMissile],
+	enemy: [colliderTags.missile],
 };
 
 /** How many times should the collision be checked between 2 positions */
-export const collisionIterations = 4;
+export const collisionIterations = 1;
 
 /** How close does 2 colliders can be before they collide */
 export const minCollisionDistance = 0.4;

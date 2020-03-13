@@ -7,11 +7,13 @@ import NetworkManager from "./engine/Networking";
 import { ParticleSystem, Particle } from "./engine/ParticleSystem";
 import { Vector2 } from "./engine/Struct";
 import * as Utils from "./engine/Utils";
+import { Spawner } from "./Enemy";
 
 document.title = "Spaceships";
 
 window.players = [];
 
+/** @type {("PURPLE" | "BLUE" | "GREEN")} */
 const playerColor = null;
 
 window.main = main(() => {
@@ -19,19 +21,20 @@ window.main = main(() => {
 	Input.OnNewControllerListener((input, id) => {
 		const player = new Player(input, playerColor);
 		Input.OnGetControllerState(id, () => {
-			return {position: player.localPosition, color: player.shipColor};
+			return {position: player.localPosition, color: player.label};
 		});
 
 		Input.OnSetControllerState(id, (data) => {
 			if (data) {
 				player.localPosition = data.position;
-				player.shipColor = data.color;
+				player.label = data.color;
 			}
 		});
 		GameObject.init(player, 10);
 	});
 
 	InitStarParticles();
+	GameObject.init(new Spawner());
 });
 
 
@@ -52,10 +55,11 @@ function InitStarParticles() {
 
 	const particleSystem = new ParticleSystem({
 		particles: [particle],
-		delay: 10
+		delay: () => Math.random() * 50,
 	}, true);
 	holder.addComponent(particleSystem);
 }
+
 
 
 let lobbies = [];

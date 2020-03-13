@@ -58,8 +58,10 @@ function Update(tick) {
  * @param {CanvasRenderingContext2D} canvas 
  */
 function DrawDebug(canvas) {
-	for (const debug of currentDebugs)
+	for (const key in currentDebugs) {
+		const debug = currentDebugs[key];
 		debug(canvas);
+	}
 }
 
 /**

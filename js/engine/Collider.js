@@ -1,6 +1,11 @@
 import { colliderTags, collisionIgnoreMatrix } from "../Config";
 import Component from "./Component";
 
+
+/** 
+ * @typedef {Collider} Collider
+ */
+
 export default class Collider extends Component {
 
 	/**
@@ -96,8 +101,9 @@ export default class Collider extends Component {
 			if (other.gameObject.equals(this.gameObject))
 				continue;
 			const contains = this.collisions.includes(other);
+
 			if(this.canCollide(other) && this.collides(other)) {
-				collide = true;
+				collide = !this.isTrigger && !other.isTrigger;
 				if (!contains) {
 					this._onCollisionStart(other);
 				} else {

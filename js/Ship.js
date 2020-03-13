@@ -60,22 +60,32 @@ class ShipAnimator extends Animator {
 }
 
 class Thruster extends GameObject {
-	constructor(parent) {
+	/** @param {ThrusterWidth} width */
+	constructor(parent, width) {
 		super();
 
 		this.parent = parent;
 		this.type = Thruster.types.normal;
 		this.sprite = sprites.thruster;
+		this.width = width;
 	}
 
 	update(tick) {
 		const frame = Math.floor(tick / 4) % 3;
 	
-		this.spriteRect = this.sprite.getSpriteFromLabel(this.type, 0, frame);
+		const widthRect = this.sprite.getSpriteFromLabel(this.width, 0, 0);
+		const rect = this.sprite.getSpriteFromLabel(this.type, 0, frame);
+		rect.x += widthRect.x;
+		rect.y += widthRect.y;
+		this.spriteRect = rect;
 	}
 }
 Thruster.types = {normal: "NORMAL", back: "BACK", forward: "FORWARD"};
-
+/** @enum {ThrusterWidth} */
+Thruster.widths = {normal: "NORMAL", wide: "WIDE", thing: "THIN"};
+/**
+ * @public
+ */
 export default class Ship extends GameObject {
 	
 	/**
@@ -104,6 +114,9 @@ export default class Ship extends GameObject {
 
 	onDeath() {
 		this.anim.deadTime = GameObject.tick;
+		console.log(`${this.constructor.name} died`);
+		this.clearThrusters();
+		this.destroy();
 	}
 
 	/** @type {Number} */
@@ -135,9 +148,10 @@ export default class Ship extends GameObject {
 	 * @param {Vector2} defaultOffset 
 	 * @param {Vector2} leftOffset 
 	 * @param {Vector2} rightOffset 
+	 * @param {("NORMAL" | "NORMAL2" | "WIDE" | "THIN")} widthLabel
 	 */
-	addThruster(defaultOffset, leftOffset, rightOffset, flipX = false, flipY = false) {
-		const object = GameObject.init(new Thruster(this), 10);
+	addThruster(defaultOffset, leftOffset, rightOffset, widthLabel = "NORMAL", flipX = false, flipY = false) {
+		const object = GameObject.init(new Thruster(this, widthLabel), 10);
 		object.spriteFlipX = flipX;
 		object.spriteFlipY = flipY;
 		object.localPosition = new Vector2(defaultOffset);

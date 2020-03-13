@@ -1,5 +1,6 @@
 
-export let currentDebugs = [];
+let debugCount = 0;
+export let currentDebugs = {};
 
 
 // TODO: substract camera position
@@ -17,13 +18,14 @@ export function drawRect(x,y,w,h,color="red",time=1) {
 	y = Math.round(y) + 0.5;
 	w = Math.round(w) - 1;
 	h = Math.round(h) - 1;
+	const id = debugCount++;
 	/**
 	 * @param {CanvasRenderingContext2D} canvas 
 	 */
 	let draw = function (canvas) {
 		time--;
 		if (time <= 0)
-			currentDebugs.splice(currentDebugs.indexOf(draw), 1);
+			delete currentDebugs[id];
 		canvas.beginPath();
 		canvas.strokeStyle = color;
 		canvas.lineWidth = 1;
@@ -35,5 +37,5 @@ export function drawRect(x,y,w,h,color="red",time=1) {
 		canvas.stroke();
 	};
 
-	currentDebugs.push(draw);
+	currentDebugs[id] = draw;
 }

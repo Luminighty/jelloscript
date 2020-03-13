@@ -168,18 +168,29 @@ export class Particle {
 export class ParticleSystem extends Component {
 
 	/**
+	 * @callback indexCallback
+	 * @param {Number} length The length of the array to pick from
+	 * @returns {Number} The index for the next particle in the particle array
+	 */
+
+
+	/**
 	 * 
 	 * @param {GameObject} gameObject The parent element for the component
-	 * @param {{particles: Particle[], delay: Number}} options 
+	 * @param {{
+	 * 	particles: Particle[] | Function,
+	 * 	nextIndex: indexCallback,
+	 * 	delay: Number | Function}} options 
 	 * @param {Boolean} enabled 
 	 */
 	constructor(options, enabled = false) {
 		super(null, enabled);
 
 		/** @type {Particle[]} */
-		this.particles = options.particles || [];
-		this.delay = options.delay;
-		this._currentDelay = 0;
+		this.particles = asFunction(options.particles, []);
+		this.nextIndex = options.nextIndex || ((length) => Math.floor(Math.random() * length));
+		this.delay = asFunction(options.delay, 20);
+		this._currentDelay = this.delay();
 	}
 
 	/** 
@@ -191,13 +202,13 @@ export class ParticleSystem extends Component {
 	}
 
 	update(tick) {
-		this._currentDelay++;
-		if (this.delay > this._currentDelay)
+		this._currentDelay--;
+		if (this._currentDelay > 0)
 			return;
-		this._currentDelay = 0;
+		this._currentDelay = this.delay();
 		
-		const particleIndex = Math.floor(Math.random() * this.particles.length);
-		this.particles[particleIndex].spawn(this.gameObject);
+		const particleIndex = this.nextIndex(this.particles.length);
+		this.particles()[particleIndex].spawn(this.gameObject);
 	}
 
 	/**
