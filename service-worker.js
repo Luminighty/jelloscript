@@ -33,11 +33,22 @@ const cacheFiles = [
 	// User files
 	'js/Ship.js',
 	'js/Player.js',
-	'media/shoot.wav',
+	'js/Enemy.js',
+	'js/Missile.js',
+	'js/Explosion.js',
+
+	// assets
 	'media/spaceship_player.png',
 	'media/stars.png',
+	'media/particles.png',
 	'media/thruster.png',
-	'media/wrong.wav',
+
+	'media/sounds/shoot.wav',
+	'media/sounds/wrong.wav',
+	'media/sounds/explosion.wav',
+	'media/sounds/explosion_big.wav',
+	'media/sounds/spacey.wav',
+
 	'media/input/axis.png',
 	'media/input/btn_a.png',
 	'media/input/btn_b.png',
@@ -71,7 +82,10 @@ self.addEventListener("fetch", (event) => {
 			var responseClone = response.clone();
 			caches.open(cacheName)
 				.then((cache) => {
-					cache.put(event.request, responseClone);
+					return cache.put(event.request, responseClone);
+				})
+				.catch(err => {
+					throw err;
 				});
 			return response;
 

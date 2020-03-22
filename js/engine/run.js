@@ -37,12 +37,43 @@ export function main(onStart) {
 
 	return setInterval(() => {
 		Update(tick);
+		UpdateTimers();
 		canvas.clearRect(0,0,canvasConfig.size.x, canvasConfig.size.y);
 		Draw(canvas, tick);
 		DrawDebug(canvas);
 		Controller.updateControllers();
 		tick++;
 	}, 1000/60);
+}
+
+export const timers = {id: 0, intervals: {}, timeouts: {}};
+function UpdateTimers() {
+	if (timers.intervals)
+	for (const id in timers.intervals) {
+		if (timers.intervals.hasOwnProperty(id)) {
+			const timer = timers.intervals[id];
+			timer.current_delay--;
+			if (timer.current_delay <= 0) {
+				timer.current_delay = timer.delay;
+				timer.callback();
+			}
+		}
+	}
+	const toDelete = [];
+	if (timers.timeouts)
+	for (const id in timers.timeouts) {
+		if (timers.timeouts.hasOwnProperty(id)) {
+			const timeout = timers.timeouts[id];
+			timeout.current_delay--;
+			if (timeout.current_delay <= 0) {
+				timeout.callback();
+				toDelete.push(id);
+			}
+		}
+	}
+	for (const id of toDelete) {
+		delete timers.timeouts[id];
+	}
 }
 
 function Update(tick) {

@@ -1,6 +1,7 @@
 /* jshint expr: true */
 import GameObject from "./GameObject";
 import {gameObjects} from "./GameObject";
+import { setGameTimeout, clearGameTimeout } from "./Utils";
 //import Collider from "./Collider";
 
 let currentId = 0;
@@ -106,7 +107,7 @@ export default class Component {
 		const gameObject = object.gameObject;
 		const des = function() {
 			if (toDestoryObjects[gameObject.id])
-				clearInterval(toDestoryObjects[gameObject.id]);
+				clearGameTimeout(toDestoryObjects[gameObject.id]);
 			delete toDestoryObjects[gameObject.id];
 			const layer = gameObjects[gameObject.updateLayer];
 			layer.splice(layer.indexOf(gameObject), 1);
@@ -115,10 +116,12 @@ export default class Component {
 				if (component != null)
 					component.onDestroy();
 			gameObject.onDestroy();
+			console.log(`${gameObject.constructor.name} destroyed`);
+			
 		};
 		if (delay <= 0) {
 			des();
-		} else { toDestoryObjects[gameObject.id] = setTimeout(() => { des(); }, delay); }
+		} else { toDestoryObjects[gameObject.id] = setGameTimeout(() => { des(); }, delay); }
 	}
 
 	/**

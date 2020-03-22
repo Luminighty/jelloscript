@@ -24,7 +24,7 @@ class ParticleObject extends GameObject {
 		this._currentLifeSpan = 0;
 		this.sprite = particle.sprite;
 		this.spriteRect = (particle.spriteRect) ? particle.spriteRect : this.spriteRect;
-		this.spriteAlphaCallback = particle.spriteAlphaCallback;
+		this.spriteAlphaCallback = particle.spriteAlpha;
 
 		this._listeners = listeners;
 	}
@@ -72,11 +72,11 @@ export class Particle {
 		/** @private @type {Function} */
 		this._size     = asFunction(options.size, Vector2.one);
 		/** @private @type {Function} */
-		this._position = asFunction(options.position, Vector2.one);
+		this._position = asFunction(options.position, Vector2.zero);
 		/** @private @type {Function} */
-		this._velocity = asFunction(options.velocity, Vector2.one);
+		this._velocity = asFunction(options.velocity, Vector2.zero);
 		/** @private @type {Function} */
-		this._gravity  = asFunction(options.gravity, Vector2.one);
+		this._gravity  = asFunction(options.gravity, Vector2.zero);
 		/** @private @type {Function} */
 		this._lifespan = asFunction(options.lifespan, 60);
 		/** @private @type {Function} */
@@ -112,7 +112,7 @@ export class Particle {
 	/** @type {Number} */
 	get renderingLayer() {return this._renderingLayer(); }
 	/** @type {Number} */
-	get spriteAlpha() {return this._spriteAlpha(); }
+	get spriteAlpha() {return this._spriteAlpha; }
 
 	/** @param {Vector2|Function} value */
 	set size(value) 			{this._size = asFunction(value); }
@@ -160,6 +160,10 @@ export class Particle {
 		this._listeners.on("update", callback);
 	}
 
+	/**
+	 * @returns {ParticleObject}
+	 * @param {GameObject} parent The parent object
+	 */
 	spawn(parent) {
 		return GameObject.init(new ParticleObject(this.values, parent, this._listeners), this.renderingLayer);
 	}
@@ -177,20 +181,32 @@ export class ParticleSystem extends Component {
 	/**
 	 * 
 	 * @param {GameObject} gameObject The parent element for the component
-	 * @param {{
-	 * 	particles: Particle[] | Function,
-	 * 	nextIndex: indexCallback,
-	 * 	delay: Number | Function}} options 
-	 * @param {Boolean} enabled 
+	 * @param {Object} options
+	 * @param {Particle[]} options.particles	The particles to choose from
+	 * @param {indexCallback} options.nextIndex	The next particle to spawn from the particles array
+	 * @param {Number | Function} options.delay	The delay between spawning cycles
+	 * @param {Number | Function} options.burst The amount of particles to spawn per cycle
+	 * @param {Boolean} enabled Is the component enabled (false by defaults)
 	 */
 	constructor(options, enabled = false) {
 		super(null, enabled);
 
 		/** @type {Particle[]} */
-		this.particles = asFunction(options.particles, []);
+		this.particles = options.particles;
 		this.nextIndex = options.nextIndex || ((length) => Math.floor(Math.random() * length));
 		this.delay = asFunction(options.delay, 20);
-		this._currentDelay = this.delay();
+		this.burst = asFunction(options.burst, 1);
+		this._currentDelay = 0;
+
+		this.particlesObjects = [];
+	}
+
+	onDestroy() {
+		
+		for (const p of this.particlesObjects) {
+			if (p.lifePercent < 1.0)
+				p.destroy();
+		}
 	}
 
 	/** 
@@ -207,8 +223,12 @@ export class ParticleSystem extends Component {
 			return;
 		this._currentDelay = this.delay();
 		
-		const particleIndex = this.nextIndex(this.particles.length);
-		this.particles()[particleIndex].spawn(this.gameObject);
+		const burst = this.burst();
+		for (let i = 0; i < burst; i++) {
+			const particleIndex = this.nextIndex(this.particles.length);
+			let obj = this.particles[particleIndex].spawn(this.gameObject);
+			this.particlesObjects.push(obj);
+		}
 	}
 
 	/**

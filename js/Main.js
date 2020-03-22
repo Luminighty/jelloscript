@@ -32,7 +32,7 @@ window.main = main(() => {
 		});
 		GameObject.init(player, 10);
 	});
-
+	sounds.MUSIC.bgm.play();
 	InitStarParticles();
 	GameObject.init(new Spawner());
 });

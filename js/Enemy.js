@@ -6,6 +6,7 @@ import Sprite from "./engine/Sprite";
 import { sprites } from "./Assets";
 import BoxCollider from "./engine/BoxCollider";
 import { colliderTags } from "./Config";
+import Explosion from "./Explosion";
 
 /** @public */
 export default class Enemy extends Ship {
@@ -32,14 +33,26 @@ export default class Enemy extends Ship {
 		/** @type {function():Number}*/
 		this._speed = asFunction(options.speed, 1);
 
-		this.addComponent(new BoxCollider(colliderTags.enemy, [20, 20], [0,0], false, true));
+		this.collider = this.addComponent(new BoxCollider(colliderTags.enemy, [20, 20], [0,0], false, true));
 	
 		//this.sprite = this.spriteGetter(0);
 		this.spriteRect = this.spriteRectGetter(0);
 		this.spriteFlipY = true;
-		this.destroy(5000);
+		this.destroy(500);
+	}
+	/**
+	 * 
+	 * @param {import("./engine/Collider").Collider} other 
+	 */
+	onTriggerEnter(other) {
+		if (other.tag == colliderTags.player)
+			other.gameObject.onTriggerEnter(this.collider);
 	}
 
+	onDeath() {
+		GameObject.init(new Explosion(this.position, 20));
+		this.destroy();
+	}
 
 
 	get speed() {return this._speed(this.lifetime);}
@@ -76,6 +89,7 @@ export class Spawner extends GameObject {
 	get delay() {
 		return Math.floor(Math.random() * 50 + 10);
 	}
+
 
 }
 

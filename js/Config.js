@@ -25,7 +25,7 @@ export const canvasConfig = {
 export const debugMode = {
 	isDebugOn: true,
 	Collider: {
-		bounds: true
+		bounds: false
 	}
 };
 

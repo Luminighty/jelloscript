@@ -1,4 +1,5 @@
 import { Vector2 } from "./Struct";
+import { timers } from "./run";
 
 /**
  * A random selection based on the chances array.
@@ -84,4 +85,47 @@ export function asFunction(value, defaultValue) {
 		return value;
 	}
 	return (value != null) ? () => value : () => defaultValue;
+}
+
+
+/**
+ * Same as setTimeout, but uses ingame time
+ * @param {CallableFunction} callback 
+ * @param {Number} delay Tick count before callback
+ * @returns {Number} Id used for clearGameTimeout
+ */
+export function setGameTimeout(callback, delay) {
+	const id = timers.id++;
+	timers.timeouts[id] = {
+		callback, delay, current_delay: delay,
+	};
+	return id;
+}
+/**
+ * Stops the timeout from triggering
+ * @param {Number} timeout The id returned from setGameTimeout
+ */
+export function clearGameTimeout(timeout) {
+	delete timers.timeouts[timeout];
+}
+/**
+ * Same as setInterval, but uses ingame time
+ * @param {CallableFunction} callback 
+ * @param {Number} delay Tick count between callbacks
+ * @returns {Number} Id used for clearGameInterval
+ */
+export function setGameInterval(callback, delay) {
+	const id = timers.id++;
+	timers.intervals[id] = {
+		callback, delay, current_delay: delay,
+	};
+	return id;
+}
+
+/**
+ * Stops the callbacks from triggering again
+ * @param {Number} interval The id returned from setGameInterval
+ */
+export function clearGameInterval(interval) {
+	delete timers.intervals[interval];
 }

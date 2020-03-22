@@ -4,6 +4,7 @@ import { sprites } from "./Assets";
 import Sprite from "./engine/Sprite";
 import { Vector2 } from "./engine/Struct";
 import { colliderTags } from "./Config";
+import { ParticleSystem, Particle } from "./engine/ParticleSystem";
 
 
 class ShipAnimator extends Animator {
@@ -68,6 +69,22 @@ class Thruster extends GameObject {
 		this.type = Thruster.types.normal;
 		this.sprite = sprites.thruster;
 		this.width = width;
+
+		let particle = new Particle({
+			gravity: () => {return Vector2.up.multiply(Math.random() * 0.02);},
+			spriteAlpha: (lifetime) => {return 1-lifetime;},
+			velocity: () => {return Vector2.right.multiply(Math.random() - 0.5);},
+			sprite: sprites.particles,
+			spriteRect: () => {
+				let x = Math.round(Math.random());
+				let y = Math.round(Math.random());
+				return sprites.particles.getSpriteRect(4 + x, 2 + y);
+			},
+		 });
+		this.particles = this.addComponent(new ParticleSystem({
+			particles: [particle],
+			delay: 10,
+		}, true));
 	}
 
 	update(tick) {

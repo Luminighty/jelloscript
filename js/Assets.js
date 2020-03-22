@@ -35,15 +35,26 @@ export const sprites = {
 			"SHOOT": {x: 1, y: 0},
 		}),
 	},
+	particles: new Sprite("./media/particles.png", [1,1], [0,0], [0,0], {
+		"THRUSTER": {x: 4, y: 2},
+		"EXPLOSION": {x: 0, y: 0},
+		"MISSILE_PURPLE": {x: 0, y: 2},
+		"MISSILE_BLUE": {x: 1, y: 2},
+		"MISSILE_GREEN": {x: 2, y: 2},
+	}),
 };
 
 export const sounds = {
 	MUSIC: {
-		test: new Sound("./media/temp/magicka.wav", true),
+		bgm: new Sound("./media/sounds/spacey.wav", true),
 	},
 	SOUND: {
 		temp: { test: new Sound("./media/temp/sound.wav"), },
-		shoot: new Sound("./media/shoot.wav"),
-		wrong: new Sound("./media/wrong.wav"),
+		shoot: new Sound("./media/sounds/shoot.wav"),
+		wrong: new Sound("./media/sounds/wrong.wav"),
+		explosions: {
+			normal: new Sound("./media/sounds/explosion.wav"),
+			big: new Sound("./media/sounds/explosion_big.wav"),
+		}
 	}
 };
