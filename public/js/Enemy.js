@@ -3,10 +3,11 @@ import { asFunction } from "./engine/Utils";
 import { Vector2, Rect } from "./engine/Struct";
 import GameObject from "./engine/GameObject";
 import Sprite from "./engine/Sprite";
-import { sprites } from "./Assets";
+import { sprites, sounds } from "./Assets";
 import BoxCollider from "./engine/BoxCollider";
 import { colliderTags } from "./Config";
 import Explosion from "./Explosion";
+import NetworkManager from "./engine/Networking";
 
 /** @public */
 export default class Enemy extends Ship {
@@ -51,6 +52,7 @@ export default class Enemy extends Ship {
 
 	onDeath() {
 		GameObject.init(new Explosion(this.position, 20));
+		sounds.SOUND.explosions.big.playOnce();
 		this.destroy();
 	}
 
@@ -70,17 +72,27 @@ export class Spawner extends GameObject {
 		super();
 		this.hidden = true;
 		this.currentDelay = this.delay;
+		this.host = true;
+		NetworkManager.onMessage("spawnEnemy", this.onSpawn);
+	}
+
+	onSpawn(data) {
+		GameObject.init(new Enemy(data.position, {}), 20);
+		console.log(data);
 	}
 
 	update() {
+		if (!this.host)
+			return;
 		this.currentDelay--;
 		if (this.currentDelay > 0)
 			return;
 		
-		GameObject.init(new Enemy(this.position, {}), 20);
+		const position = this.position;
+		GameObject.init(new Enemy(position, {}), 20);
 		this.currentDelay = this.delay;
+		NetworkManager.sendMessage("spawnEnemy", {position});
 	}
-
 
 	get position() {
 		return Vector2.right.multiply(Math.random() * 580 + 30);
@@ -89,7 +101,5 @@ export class Spawner extends GameObject {
 	get delay() {
 		return Math.floor(Math.random() * 50 + 10);
 	}
-
-
 }
 

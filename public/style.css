@@ -12,6 +12,9 @@ html {
 	/*background-color: magenta;*/
 }
 
+#UIContainer * {
+	margin-bottom: 40px;
+}
 
 
 #btn-host {
@@ -20,7 +23,7 @@ html {
 	color: red;
 	font-size: 16px;
 	top: 10px;
-	left: 10px;
+	right: 10px;
 }
 #btn-connect {
 	position: fixed;
@@ -28,7 +31,7 @@ html {
 	color: blue;
 	font-size: 16px;
 	top: 50px;
-	left: 10px;
+	right: 10px;
 }
 #btn-refresh {
 	position: fixed;
@@ -36,5 +39,5 @@ html {
 	color: green;
 	font-size: 16px;
 	top: 30px;
-	left: 10px;
+	right: 10px;
 }

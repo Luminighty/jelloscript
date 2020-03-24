@@ -8,9 +8,11 @@ import { colliderTags } from './Config';
 import Ship from './Ship';
 import Missile from './Missile';
 import Enemy from './Enemy';
+import Explosion from './Explosion';
+import Slider from './Slider';
 
 export default class Player extends Ship {
-	constructor(input, label, x=120, y=120) {
+	constructor(input, label, healthSlider, x=120, y=120) {
 		super(sprites.playership, (label) ? label : Utils.decide([1,1,1], ["PURPLE", "GREEN", "BLUE"]));
 
 		/** @type {Vector2} */
@@ -24,6 +26,9 @@ export default class Player extends Ship {
 		this.input.Buttons.A.onPressed(() => {this.onShoot();} );
 		this.input.Buttons.B.onPressed(() => {this.onBack();} );
 		this.shootDelay = 0;
+		/** @type {Slider} */
+		this.healthSlider = healthSlider;
+		this.healthSlider.maxValue = this.maxHealth;
 	}
 
 	addThrusters() {
@@ -43,6 +48,7 @@ export default class Player extends Ship {
 				break;
 		}
 	}
+
 
 
 	onShoot() {
@@ -116,8 +122,13 @@ export default class Player extends Ship {
 
 	onDeath() {
 		super.onDeath();
+		GameObject.init(new Explosion(this.position, 25));
+		sounds.SOUND.explosions.big.playOnce();
 	}
 
+	onHit() {
+		this.healthSlider.value = this.health;
+	}
 
 	/**
 	 * @param {import('./engine/Collider').Collider} other 

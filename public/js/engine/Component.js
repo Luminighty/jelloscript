@@ -116,7 +116,7 @@ export default class Component {
 				if (component != null)
 					component.onDestroy();
 			gameObject.onDestroy();
-			console.log(`${gameObject.constructor.name} destroyed`);
+			//console.log(`${gameObject.constructor.name} destroyed`);
 			
 		};
 		if (delay <= 0) {

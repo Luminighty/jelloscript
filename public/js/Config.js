@@ -5,6 +5,8 @@
 export const canvasConfig = {
 	/** The query used for finding the canvas */
 	canvasQuery: "#mainCanvas",
+	/** The element that stores the UI elements */
+	uiContainerQuery: "#UIContainer",
 	/** Canvas size in pixels */
 	size: {x: 640, y: 360},
 	/** Canvas ratio */

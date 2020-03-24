@@ -15,7 +15,7 @@ server.listen(PORT, HOST, () => {
 	jello.init(server, jelloLog);
 });
 
-app.use(express.static(`${__dirname}/..`, {extensions: ['html', 'js']}));
+app.use(express.static(`${__dirname}/../public/`, {extensions: ['html', 'js']}));
 /*
 http.listen(PORT, function(){
 	console.log('listening on *:3000');

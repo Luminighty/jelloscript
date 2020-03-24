@@ -2,6 +2,8 @@ const cacheName = 'game';
 const cacheFiles = [
 	// Default ones
 	'/',
+	'manifest.json',
+	'install.json',
 	'index.html',
 	'style.css',
 	'js/engine/Utils.js',

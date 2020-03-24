@@ -8,6 +8,8 @@ import { ParticleSystem, Particle } from "./engine/ParticleSystem";
 import { Vector2 } from "./engine/Struct";
 import * as Utils from "./engine/Utils";
 import { Spawner } from "./Enemy";
+import Slider from "./Slider";
+import { canvasConfig } from "./Config";
 
 document.title = "Spaceships";
 
@@ -16,25 +18,37 @@ window.players = [];
 /** @type {("PURPLE" | "BLUE" | "GREEN")} */
 const playerColor = null;
 
+const ui = document.querySelector(canvasConfig.uiContainerQuery);
+customElements.define('game-slider', Slider);
+
+
+const spawner = new Spawner();
 window.main = main(() => {
 	
 	Input.OnNewControllerListener((input, id) => {
-		const player = new Player(input, playerColor);
+		
+		const health = document.createElement("game-slider");
+		ui.appendChild(health);
+
+		const player = new Player(input, playerColor, health);
 		Input.OnGetControllerState(id, () => {
-			return {position: player.localPosition, color: player.label};
+			return {position: player.localPosition, color: player.label, health: player.health};
 		});
 
 		Input.OnSetControllerState(id, (data) => {
 			if (data) {
 				player.localPosition = data.position;
 				player.label = data.color;
+				health.value = data.health;
 			}
 		});
+
+
 		GameObject.init(player, 10);
 	});
 	sounds.MUSIC.bgm.play();
 	InitStarParticles();
-	GameObject.init(new Spawner());
+	GameObject.init(spawner);
 });
 
 
@@ -70,13 +84,14 @@ NetworkManager.onLobbiesRefreshed((newLobbies) => {
 });
 
 document.querySelector("#btn-connect").addEventListener("click", (e) => {
-	NetworkManager.connect(lobbies[lobbies.length - 1]);
+	window.connectLobby(lobbies.length - 1);
 });
 document.querySelector("#btn-host").addEventListener("click", NetworkManager.host);
 document.querySelector("#btn-refresh").addEventListener("click", NetworkManager.refreshLobbies);
 
 window.connectLobby = function(id) {
 	NetworkManager.connect(lobbies[id]);
+	spawner.host = false;
 };
 
 window.hostLobby = () => {

@@ -125,8 +125,13 @@ export default class Ship extends GameObject {
 
 	hit(damage) {
 		this.health -= damage;
+		this.onHit();
 		if (this.health <= 0)
 			this.onDeath();
+	}
+
+	onHit() {
+
 	}
 
 	onDeath() {
