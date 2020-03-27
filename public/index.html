@@ -10,6 +10,7 @@
 	<meta name="theme-color" content="#000030"/>
 	<link rel="apple-touch-icon" href="media/icons/icons-192.png">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="jellostyles.css">
 	<link rel="icon" sizes="16x16 32x32 64x64" href="/favicon.ico">
     <title></title>
 </head>
@@ -18,15 +19,21 @@
 	
 	<canvas id="mainCanvas"></canvas>
 	<div id="UIContainer">
+		<div id="startText">Press button A to start!</div>
+		<div id="menu" class="middle">
+			<div id="local" class="button">Local</div>
+			<div id="host" class="button">Host</div>
+			<div id="connect" class="button">Join</div>
+		</div>
+		<div id="lobbies" class="middle">
+			<div id="toMenu">Back</div>
+		</div>
+		<div id="couchMode" class="button">Couch Mode OFF</div>
+		<div id="health">
+
+		</div>
 	</div>
 	<!--script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script-->
-
-
-
-	<!-- To be removed -->
-	<div id="btn-host">HOST</div>
-	<div id="btn-refresh">REFRESH</div>
-	<div id="btn-connect">CONNECT</div>
 
 	<script src="/socket.io/socket.io.js"></script>
 	<script> window.io = io; </script>

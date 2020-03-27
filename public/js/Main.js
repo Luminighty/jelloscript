@@ -19,41 +19,83 @@ window.players = [];
 const playerColor = null;
 
 const ui = document.querySelector(canvasConfig.uiContainerQuery);
+const startText = document.querySelector("#startText");
+const menu = document.querySelector("#menu");
+const lobbies = document.querySelector("#lobbies");
+
+
 customElements.define('game-slider', Slider);
 
-
 const spawner = new Spawner();
+let isInLobby = false;
+let isHost = true;
+let isStarted = false;
+spawner.enabled = false;
+
+let couchMode = false;
+
+const particleHolder = GameObject.init(new GameObject(), 0);
+const players = [];
 window.main = main(() => {
 	
-	Input.OnNewControllerListener((input, id) => {
-		
-		const health = document.createElement("game-slider");
-		ui.appendChild(health);
-
-		const player = new Player(input, playerColor, health);
-		Input.OnGetControllerState(id, () => {
-			return {position: player.localPosition, color: player.label, health: player.health};
-		});
-
-		Input.OnSetControllerState(id, (data) => {
-			if (data) {
-				player.localPosition = data.position;
-				player.label = data.color;
-				health.value = data.health;
-			}
-		});
-
-
-		GameObject.init(player, 10);
-	});
-	sounds.MUSIC.bgm.play();
+	Input.OnNewControllerListener(onNewController);
 	InitStarParticles();
 	GameObject.init(spawner);
 });
 
 
+
+/**
+ * 
+ * @param {import("./engine/InputManager").Inputs} input 
+ * @param {*} id 
+ */
+function onNewController(input, id) {		
+	const health = document.createElement("game-slider");
+	ui.appendChild(health);
+
+	const player = new Player(input, playerColor, health);
+	players.push(player);
+	Input.OnGetControllerState(id, () => {
+		return {position: player.localPosition, color: player.label, health: player.health};
+	});
+
+	Input.OnSetControllerState(id, (data) => {
+		if (data) {
+			player.localPosition = data.position;
+			player.label = data.color;
+			health.value = data.health;
+		}
+	});
+	input.Buttons.A.onPressed(StartGame);
+
+	GameObject.init(player, 10);
+}
+
+function checkCouchMode() {
+	if (!couchMode)
+		return;
+	particleHolder.enabled = false;
+	spawner.enabled = false;
+	ui.style.display = "none";
+}
+
+function StartGame() {
+	if (!isInLobby || isStarted || !isHost)
+		return;
+	isStarted = true;
+	startText.remove();
+	spawner.enabled = !couchMode;
+	sounds.MUSIC.bgm.play();
+	NetworkManager.sendMessage("start game");
+}
+
+NetworkManager.onMessage("start game", () => {
+	startText.style.display = "none";
+	checkCouchMode();
+});
+
 function InitStarParticles() {
-	const holder = GameObject.init(new GameObject(), 0);
 	const particle = new Particle({
 		position: () => [Math.random() * 640, -5],
 		velocity: () => [0, Math.random() * 0.3 + 0.5],
@@ -71,37 +113,84 @@ function InitStarParticles() {
 		particles: [particle],
 		delay: () => Math.random() * 50,
 	}, true);
-	holder.addComponent(particleSystem);
+	particleHolder.addComponent(particleSystem);
 }
 
-
-
-let lobbies = [];
-let firstLobby = null;
-NetworkManager.onLobbiesRefreshed((newLobbies) => {
-	lobbies = newLobbies;
-	console.log(lobbies);
+NetworkManager.setStateGetter(() => {
+	return {isStarted};
 });
 
-document.querySelector("#btn-connect").addEventListener("click", (e) => {
-	window.connectLobby(lobbies.length - 1);
+
+NetworkManager.setStateSetter((data) => {
+	console.log(data);
+	startText.style.display = (data.isStarted) ? "none" : "block";
 });
-document.querySelector("#btn-host").addEventListener("click", NetworkManager.host);
-document.querySelector("#btn-refresh").addEventListener("click", NetworkManager.refreshLobbies);
 
-window.connectLobby = function(id) {
-	NetworkManager.connect(lobbies[id]);
-	spawner.host = false;
-};
 
-window.hostLobby = () => {
-	NetworkManager.host();
-	console.log("Hosting...");
-};
-window.refreshLobbies = NetworkManager.refreshLobbies;
+NetworkManager.onLobbiesRefreshed((lobbylist) => {
+	while (lobbies.childElementCount > 1) {
+		lobbies.removeChild(lobbies.firstChild);
+	}
 
-/*
-const socket = window.io();
-socket.on("connect", () => {
-	console.log(`connected`);
-});*/
+
+	lobbylist.forEach((lobby) => {
+		const element = document.createElement("div");
+		element.innerText = lobby.lobbyName;
+		element.classList.add("button");
+		element.classList.add("lobby");
+
+		element.addEventListener("click", () => {
+			NetworkManager.connect(lobby);
+			lobbies.style.display = "none";
+			startText.innerText = "Waiting for host...";
+			startText.style.display = "block";
+			isHost = false;
+			checkCouchMode();
+		});
+
+		lobbies.insertBefore(element, lobbies.firstChild);
+	});
+
+});
+
+document.querySelector("#local").addEventListener("click", (e) => {
+	isInLobby = true;
+	menu.style.display = "none";
+	startText.innerText = "Press button A to start!";
+	startText.style.display = "block";
+});
+
+document.querySelector("#toMenu").addEventListener("click", (e) => {
+	menu.style.display = "block";
+	lobbies.style.display = "none";
+});
+
+document.querySelector("#host").addEventListener("click", (e) => {
+	isInLobby = true;
+	menu.style.display = "none";
+	startText.innerText = "Press button A to start!";
+	startText.style.display = "block";
+	NetworkManager.host(prompt("Lobby name"));
+});
+
+document.querySelector("#connect").addEventListener("click", (e) => {
+	NetworkManager.refreshLobbies();
+	lobbies.style.display = "block";
+	menu.style.display = "none";
+});
+
+const couchModeElement = document.querySelector("#couchMode");
+if (Utils.mobileAndTabletCheck()) {
+	couchModeElement.style.display = "block";
+}
+
+couchModeElement.addEventListener("click", () => {
+	couchMode = !couchMode;
+	if (couchMode) {
+		couchModeElement.innerText = "Couch Mode ON";
+		couchModeElement.classList.add("on");
+	} else {
+		couchModeElement.innerText = "Couch Mode OFF";
+		couchModeElement.classList.remove("on");
+	}
+});

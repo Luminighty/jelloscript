@@ -22,7 +22,7 @@ export default class Enemy extends Ship {
 	*/
 	constructor(position, options) {
 		const _sprite = asFunction(options.sprite, sprites.enemies.basic);
-		super(_sprite(0), "BASIC", 50);
+		super(_sprite(), "BASIC", 20);
 		
 		if (options == null)
 			options = {};
@@ -57,7 +57,7 @@ export default class Enemy extends Ship {
 	}
 
 
-	get speed() {return this._speed(this.lifetime);}
+	get speed() { return this._speed(this.lifetime);}
 
 	get move() { return this._move(this.lifetime); }
 }
@@ -77,6 +77,8 @@ export class Spawner extends GameObject {
 	}
 
 	onSpawn(data) {
+		if (!this.enabled)
+			return;
 		GameObject.init(new Enemy(data.position, {}), 20);
 		console.log(data);
 	}

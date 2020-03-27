@@ -18,7 +18,7 @@ export const DefaultKeyboardControls = [
 	{
 		Buttons: {
 			A: "KeyX",
-			B: "KeyC"
+			//B: "KeyC"
 		},
 		Axes: {
 			Horizontal: AxisKeys("ArrowRight", "ArrowLeft"),
@@ -75,13 +75,13 @@ export const TouchInputs = [
 		key: "A",
 		image: "./media/input/btn_a.png",
 		css: `
-			right: 150px;
+			right: 50px;
 			bottom: 50px;
 			position: absolute;
 			background-color: #ffffff3d;
 			border-radius: 9999px;
 			z-index: 100;`
-	},
+	},/*
 	{
 		type: "Button",
 		key: "B",
@@ -93,7 +93,7 @@ export const TouchInputs = [
 			background-color: #ffffff3d;
 			border-radius: 9999px;
 			z-index: 100;`
-	}
+	}*/
 ];
 
 

@@ -37,7 +37,7 @@ function onConnect(socket) {
 
 	const updateSocketState = () => {
 		currentLobby.host.emit("get state", function(state) {
-			socket.emit();
+			socket.emit("set state", state);
 		});
 	};
 

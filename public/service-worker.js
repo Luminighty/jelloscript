@@ -3,7 +3,7 @@ const cacheFiles = [
 	// Default ones
 	'/',
 	'manifest.json',
-	'install.json',
+	 //'install.js',
 	'index.html',
 	'style.css',
 	'js/engine/Utils.js',

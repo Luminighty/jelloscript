@@ -24,7 +24,7 @@ export default class Player extends Ship {
 		this.input = input;
 
 		this.input.Buttons.A.onPressed(() => {this.onShoot();} );
-		this.input.Buttons.B.onPressed(() => {this.onBack();} );
+		//this.input.Buttons.B.onPressed(() => {this.onBack();} );
 		this.shootDelay = 0;
 		/** @type {Slider} */
 		this.healthSlider = healthSlider;
@@ -109,7 +109,7 @@ export default class Player extends Ship {
 		return (vector.sqrMagnitude > 1) ? vector.normalized : vector;
 	}
 
-	get speed() { return 1.5; }
+	get speed() { return 3; }
 
 	afterUpdate() {
 		let pos = this.position;

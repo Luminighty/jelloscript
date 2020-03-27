@@ -3,32 +3,89 @@ import {networkConfig, axisConfig} from "../Input";
 import { Axis, Button } from "./InputManager";
 import EventHandler from "./EventHandler";
 
-let NetworkManager;
+const NetworkManager = {
+	/**
+	 * Hosts a lobby
+	 * @param {String} lobbyName The display name of the lobby
+	 * @param {Object} options Any data that can be attached to the lobby (Type, Level, Minimum Score, ...)
+	 * @param {Number} connectionLimit Maximum amount of clients that can be connected to the lobby
+	 */
+	host: (lobbyName, options = {}, connectionLimit = 8) => {},
+	/**
+	 * Connects to the lobby passed to the function
+	 * @param {Lobby} lobby 
+	 */
+	connect: (lobby) => {},
+	/**
+	 * Refreshes the lobbies list
+	 * @param {Object} options Options for the query
+	 */
+	refreshLobbies: (options) => {},
+	/**
+	 * Adds a listener for lobbies. It is called whenever the lobbies got refreshed.
+	 * @param {LobbyCallback} callback 
+	 */
+	onLobbiesRefreshed: (callback) => {},
+	/**
+	 * Sets a function that should return the current state of the game used by the StateSetter
+	 * @param {CallableFunction} callback 
+	 */
+	setStateGetter: (callback) => {},
+	/**
+	 * Sets a function that should set the current state of the game (returned by the StateGetter)
+	 * @param {CallableFunction} callback 
+	 */
+	setStateSetter: (callback) => {},
+	/**
+	 * Updates the current state of the game after asking for an update from the host
+	 */
+	updateState: () => {},
+	/**
+	 * Sets a listener for messages
+	 * @param {String} type The type of the message to listen to
+	 * @param {CallableFunction} callback The function to call when a message was received
+	 */
+	onMessage: (type, callback) => {},
+	/** Sends a typed message to the other clients
+	 * @param {String} type The type of the message to send
+	 * @param {...any} args The additional data to pass
+	 */
+	sendMessage: (type, ...args) => {},
+	/** @type {Lobby[]} */
+	lobbies: [],
+	/** @returns {Boolean} True if the client is connected to the node socket.io server */
+	isOnline: () => false,
+};
 
-if (typeof window.io === 'undefined') {
+/**
+ * @callback LobbyCallback
+ * @param {Lobby[]} lobbies
+ */
 
-	NetworkManager = {
-		host: () => {},
-		connect: () => {},
-		refreshLobbies: () => {},
-		onLobbiesRefreshed: () => {},
-		setStateGetter: () => {},
-		setStateSetter: () => {},
-		updateState: () => {},
-		onMessage: () => {},
-		sendMessage: () => {},
-		/** @type {Lobby[]} */
-		lobbies: []
-	};
 
-} else {
+/**
+ * @typedef {Object} Lobby
+ * @property {Number} id The ID for the lobby
+ * @property {String} lobbyName The display name for a lobby.
+ * @property {Number} connectionLimit The maximum number users can connect to a lobby
+ * @property {any} data Optional data (description, lobby type, ect.)
+ */
+
+
+/** Converts the inputs to only have their states */
+let inputToValues = function(inputs) {};
+/** Sends a new controller to the server. Only if it's a local controller */
+let addController = function(inputs, id, type, isLocal) {};
+
+
+if (typeof window.io !== 'undefined') {
 
 	const socket = window.io(/*networkConfig.host*/);
+	NetworkManager.isOnline = () => true;
 
 	socket.on("connect", () => {
 		console.log("connected");
 	});
-
 
 	/**
 	 * A remote player representation for a controller
@@ -79,8 +136,8 @@ if (typeof window.io === 'undefined') {
 
 	NetworkController.networkToIdMap = {};
 
-	/** Converts the inputs to only have their states */
-	function inputToValues(inputs) {
+
+	inputToValues = function(inputs) {
 		/** @type {Object.<string, number>} */
 		const axes = {};
 		/** @type {Object.<string, number>} */
@@ -100,10 +157,9 @@ if (typeof window.io === 'undefined') {
 			}
 		}
 		return {axes, buttons};
-	}
+	};
 
-	/** Sends a new controller to the server. Only if it's a local controller */
-	function addController(inputs, id, type, isLocal) {
+	addController = function(inputs, id, type, isLocal) {
 		if (!isLocal)
 			return;
 		
@@ -113,27 +169,10 @@ if (typeof window.io === 'undefined') {
 		inputs.Controller.onInputReceived((key, state, isButton) => {
 			socket.emit("update controller", id, key, state, isButton);
 		});
-	}
+	};
 
 	// On new controller we add it to the lobby
 	OnNewControllerListener(addController);
-
-
-	/**
-	 * @typedef {Object} Lobby
-	 * @property {Number} id 
-	 * @property {String} lobbyName 
-	 * @property {Number} connectionLimit 
-	 * @property {any} data 
-	 */
-
-	/**
-	 * Container for lobby data
-	 * @param {Number} id The ID for the lobby
-	 * @param {String} lobbyName The display name for a lobby.
-	 * @param {Number} connectionLimit The maximum number users can connect to a lobby
-	 * @param {any} data Optional data (description, lobby type, ect.)
-	 */
 
 	/**
 	 * Hosts a lobby
@@ -141,52 +180,52 @@ if (typeof window.io === 'undefined') {
 	 * @param {Object} options Any data that can be attached to the lobby (Type, Level, Minimum Score, ...)
 	 * @param {Number} connectionLimit Maximum amount of clients that can be connected to the lobby
 	 */
-	function host(lobbyName, options = {}, connectionLimit = 8) {
+	NetworkManager.host = function(lobbyName, options = {}, connectionLimit = 8) {
 		const defaultLimit = networkConfig.defaultConnectionLimit;
 		const limit = (connectionLimit == undefined) ? defaultLimit : connectionLimit;
 		socket.emit("host lobby", lobbyName, options, limit);
-	}
+	};
 
 	/**
 	 * Connects to the lobby passed to the function
 	 * @param {Lobby} lobby 
 	 */
-	function connect(lobby) {
+	NetworkManager.connect = function(lobby) {
 		if (lobby == undefined || lobby.id == undefined)
 			throw "Not a lobby!";
 		socket.emit("connect lobby", lobby.id);
-	}
+	};
 
 	/**
 	 * Refreshes the lobbies list
 	 * @param {Object} options Options for the query
 	 */
-	function refreshLobbies(options) {
+	NetworkManager.refreshLobbies = function(options) {
 		socket.emit("list lobbies", (options) ? options : {});
-	}
+	};
 
 	/**
 	 * Sets a function that should return the current state of the game used by the StateSetter
 	 * @param {CallableFunction} callback 
 	 */
-	function setStateGetter(callback) {
+	NetworkManager.setStateGetter = function (callback) {
 		getState = callback;
-	}
+	};
 
 	/**
 	 * Sets a function that should set the current state of the game (returned by the StateGetter)
 	 * @param {CallableFunction} callback 
 	 */
-	function setStateSetter(callback) {
-		getState = callback;
-	}
+	NetworkManager.setStateSetter = function(callback) {
+		setState = callback;
+	};
 
 	/**
 	 * Updates the current state of the game after asking for an update from the host
 	 */
-	function updateState() {
+	NetworkManager.updateState = function() {
 		socket.emit("update state");
-	}
+	};
 
 	socket.on("get state", (sendState) => {
 		sendState(getState());
@@ -228,9 +267,9 @@ if (typeof window.io === 'undefined') {
 	 * 
 	 * @param {CallableFunction} callback 
 	 */
-	function onLobbiesRefreshed(callback) {
+	NetworkManager.onLobbiesRefreshed = function(callback) {
 		events.on("lobby refresh", callback);
-	}
+	};
 
 	socket.on("get controller state", (id, response) => {
 		console.log("get controller state", id);
@@ -243,31 +282,16 @@ if (typeof window.io === 'undefined') {
 		events.call(`messaging ${type}`, ...args);
 	});
 
-	function sendMessage(type, ...args) {
+	NetworkManager.sendMessage = function(type, ...args) {
 		if (!socket)
 			return;
 		//events.call(`messaging ${type}`, ...args);
 		socket.emit("messaging", type, args);
-	}
-
-	function onMessage(type, callback) {
-		events.on(`messaging ${type}`, callback);
-	}
-
-	NetworkManager = {
-		host,
-		connect,
-		refreshLobbies,
-		onLobbiesRefreshed,
-		setStateGetter,
-		setStateSetter,
-		updateState,
-		onMessage,
-		sendMessage,
-		/** @type {Lobby[]} */
-		lobbies: []
 	};
 
+	NetworkManager.onMessage = function(type, callback) {
+		events.on(`messaging ${type}`, callback);
+	};
 }
 
 export default NetworkManager;
