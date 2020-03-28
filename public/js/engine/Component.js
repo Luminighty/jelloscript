@@ -55,7 +55,7 @@ export default class Component {
 	 *  */
 	onDestroy() {}
 	/** 
-	 * Called fater the constructor
+	 * Called after the constructor
 	 * @public 
 	 * */
 	start() {}
