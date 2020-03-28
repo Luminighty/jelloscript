@@ -38,18 +38,21 @@ const cacheFiles = [
 	'js/Enemy.js',
 	'js/Missile.js',
 	'js/Explosion.js',
+	'js/Slider.js',
 
 	// assets
+	'media/enemies_basic.png',
+	'media/missiles.png',
+	'media/particles.png',
 	'media/spaceship_player.png',
 	'media/stars.png',
-	'media/particles.png',
 	'media/thruster.png',
 
-	'media/sounds/shoot.wav',
-	'media/sounds/wrong.wav',
-	'media/sounds/explosion.wav',
 	'media/sounds/explosion_big.wav',
+	'media/sounds/explosion.wav',
+	'media/sounds/shoot.wav',
 	'media/sounds/spacey.wav',
+	'media/sounds/wrong.wav',
 
 	'media/input/axis.png',
 	'media/input/btn_a.png',

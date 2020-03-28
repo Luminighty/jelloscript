@@ -24,7 +24,7 @@ export default class Missile extends GameObject {
 		this.damage = damage;
 		
 		this.destroy(this.lifeTime);
-		this.addComponent(new BoxCollider(colliderTags.playerMissile, [5, 8], [0,0], false, true));
+		this.addComponent(new BoxCollider(colliderTags.playerMissile, [5, 8], [0,0], true));
 
 		let particle = new Particle({
 			velocity: () => {return new Vector2(Math.random() - 0.5, Math.random() + 4); },

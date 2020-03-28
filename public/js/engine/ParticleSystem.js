@@ -180,7 +180,6 @@ export class ParticleSystem extends Component {
 
 	/**
 	 * 
-	 * @param {GameObject} gameObject The parent element for the component
 	 * @param {Object} options
 	 * @param {Particle[]} options.particles	The particles to choose from
 	 * @param {indexCallback} options.nextIndex	The next particle to spawn from the particles array
@@ -229,18 +228,5 @@ export class ParticleSystem extends Component {
 			let obj = this.particles[particleIndex].spawn(this.gameObject);
 			this.particlesObjects.push(obj);
 		}
-	}
-
-	/**
-	 * Calculates the offset based on spawnOffset
-	 * The x and y components go both way
-	 */
-	getOffset() {
-		const x = this.spawnOffset.x;
-		const y = this.spawnOffset.y;
-
-		const offsetX = (Math.random() * x * 2) - x;
-		const offsetY = (Math.random() * y * 2) - y;
-		return new Vector2(offsetX, offsetY);
 	}
 }

@@ -10,11 +10,10 @@ export default class BoxCollider extends Collider {
 	 * @param {String} tag A value from colliderTags in config.js
 	 * @param {Vector2} size The size of the box
 	 * @param {Vector2} offset The offset of the box from the player
-	 * @param {Boolean} resizeWithParent Should the collider be bigger if the parent's size is bigger
 	 * @param {Boolean} isTrigger Is the collider a trigger or a collision
 	 * @param {Number} collisionCheckMethod A value from Collider.COLLISION_CHECK_METHOD
 	 */
-	constructor(tag, size, offset=[0,0], resizeWithParent = true, isTrigger = false, collisionCheckMethod = null) {
+	constructor(tag, size, offset=[0,0], isTrigger = false, collisionCheckMethod = null) {
 		super(tag, isTrigger, collisionCheckMethod);
 		this.size = new Vector2(size);
 		this.offset = new Vector2(offset);

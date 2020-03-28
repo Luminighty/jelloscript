@@ -56,6 +56,11 @@ export default class Animator extends Component {
 }
 
 Animator.PROGRESSIONS = {
+	/**
+	 * @param {Number} lastValue 
+	 * @param {Number} nextValue 
+	 * @param {Number} percentage 
+	 */
 	linear: function (lastValue, nextValue, percentage) {
 		const delta = nextValue - lastValue;
 		return lastValue + (delta * percentage);

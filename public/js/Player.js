@@ -18,7 +18,7 @@ export default class Player extends Ship {
 		/** @type {Vector2} */
 		this.position = {x: x, y: y};
 		
-		this.addComponent(new BoxCollider(colliderTags.player, [24,24], [0,0], false, true));
+		this.addComponent(new BoxCollider(colliderTags.player, [24,24], [0,0], true));
 
  		/** @type {import("./engine/InputManager").Inputs} input */
 		this.input = input;

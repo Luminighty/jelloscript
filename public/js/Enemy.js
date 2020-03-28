@@ -34,7 +34,7 @@ export default class Enemy extends Ship {
 		/** @type {function():Number}*/
 		this._speed = asFunction(options.speed, 1);
 
-		this.collider = this.addComponent(new BoxCollider(colliderTags.enemy, [20, 20], [0,0], false, true));
+		this.collider = this.addComponent(new BoxCollider(colliderTags.enemy, [20, 20], [0,0], true));
 	
 		//this.sprite = this.spriteGetter(0);
 		this.spriteRect = this.spriteRectGetter(0);
