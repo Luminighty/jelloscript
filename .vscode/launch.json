@@ -7,11 +7,27 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Launch Program",
+			"name": "Launch Node",
 			"skipFiles": [
 				"<node_internals>/**"
 			],
 			"program": "${workspaceFolder}\\server\\index.js"
+		},
+		{
+			"name": "Launch Chrome",
+			"request": "launch",
+			"type": "pwa-chrome",
+			"url": "http://192.168.0.165/",
+			"webRoot": "${workspaceFolder}",
+			"trace": true,
+			"sourceMaps": true,
+		},
+		{
+			"type": "firefox",
+			"request": "launch",
+			"reAttach": true,
+			"name": "Launch Firefox",
+			"webRoot": "${workspaceFolder}",
 		}
 	]
 }
