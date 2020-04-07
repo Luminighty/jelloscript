@@ -3,6 +3,9 @@ import { Vector2, Rect } from "./Struct";
 import * as Debug from "./Debug";
 import { debugMode, minCollisionDistance } from "../Config";
 
+/**
+ * @see https://github.com/Luminighty/jelloscript/wiki/BoxCollider
+ */
 export default class BoxCollider extends Collider {
 
 	/**

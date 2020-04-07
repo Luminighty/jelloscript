@@ -1,6 +1,9 @@
 /* jshint expr: true */
 import Resource from "./Resource";
 
+/**
+ * @see https://github.com/Luminighty/jelloscript/wiki/Sound
+ */
 export default class Sound extends Resource {
 
     constructor(path, loop = false) {

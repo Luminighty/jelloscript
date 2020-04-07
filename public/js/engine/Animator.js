@@ -2,6 +2,9 @@ import Component from "./Component";
 import Sprite from "./Sprite";
 import { Rect } from "./Struct";
 
+/**
+ * @see https://github.com/Luminighty/jelloscript/wiki/Animator
+ */
 export default class Animator extends Component {
 	
 	/**

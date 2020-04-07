@@ -1,17 +1,16 @@
 # JelloScript Game Engine
 
-Jelloscript started out as a hobby, but later became thesis project.
+JelloScript started out as a hobby, but later became thesis project.
 
-# Sections
-- [Quick Start](./docs/Tutorial.md)
-- [Inputs](./docs/Input.md)
-- [Component](./docs/class/Component.md)
-  - [Animator](./docs/class/Animator.md)
-- [GameObject](./docs/class/GameObject.md)
-- [Resource](./docs/class/Resource.md)
-  - [Sprite](./docs/class/Sprite.md)
-  - [Sound](./docs/class/Sound.md)
-- [Structs](./docs/structs/Structs.md)
-  - [Vector2](./docs/structs/Vector2.md)
-  - [Rect](./docs/structs/Rect.md)
-  - [Sprite Label](./docs/structs/SpriteLabel.md)
+## Getting Started
+
+To use JelloScript currently you have to **fork** this repo. Later on I want to bundle it into a single `.js` file for easier use.
+
+For starters, you should check out the [Quick Start] guide on the github wiki
+
+## Contributing
+
+I really appreciate the thought, however I don't accept any contributions **yet**. Once I'm finished with my thesis I'll gladly turn the project into open-source. Expect this to be around summer this year. 
+
+
+[Quick Start]: https://github.com/Luminighty/jelloscript/wiki/Tutorial

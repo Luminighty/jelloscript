@@ -1,5 +1,7 @@
 
-
+/**
+ * @todo Not implemented yet
+ */
 export default class UIElement {
 
 	constructor() {

@@ -5,6 +5,9 @@ import Sprite from "./Sprite";
 import EventHandler from "./EventHandler";
 import { asFunction } from "./Utils";
 
+/**
+ * @see https://github.com/Luminighty/jelloscript/wiki/ParticleSystem
+ */
 class ParticleObject extends GameObject {
 	/**
 	 * 
@@ -50,21 +53,22 @@ class ParticleObject extends GameObject {
 	}
 }
 
+/**
+ * @see https://github.com/Luminighty/jelloscript/wiki/ParticleSystem
+ */
 export class Particle {
 
 	/**
-	 * 
-	 * @param {{
-	 * 	position: Vector2|Function, 
-	 * 	velocity: Vector2|Function, 
-	 * 	gravity: Vector2|Function, 
-	 * 	size: Vector2|Function,
-	 * 	lifespan: Number|Function,
-	 * 	sprite: Sprite|Function,
-	 * 	spriteRect: Rect|Function,
-	 * 	spriteAlpha: Number|Function,
-	 * 	renderingLayer: Number}} options 
-	 * 	
+	 * 	@param { Object } options
+	 * 	@param { Vector2 | Function } options.position
+	 * 	@param { Vector2 | Function } options.velocity
+	 * 	@param { Vector2 | Function } options.gravity
+	 * 	@param { Vector2 | Function } options.size
+	 * 	@param { Number  | Function } options.lifespan
+	 * 	@param { Sprite  | Function } options.sprite
+	 * 	@param { Rect    | Function } options.spriteRect
+	 * 	@param { Number  | Function } options.spriteAlpha
+	 * 	@param { Number  | Function } options.renderingLayer
 	 */
 	constructor(options) {
 		if (options == null)
@@ -169,6 +173,9 @@ export class Particle {
 	}
 }
 
+/**
+ * @see https://github.com/Luminighty/jelloscript/wiki/ParticleSystem
+ */
 export class ParticleSystem extends Component {
 
 	/**

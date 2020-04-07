@@ -18,6 +18,7 @@ export let gameObjects = [];
  * The super class for every GameObject
  * @public
  * @class
+ * @see https://github.com/Luminighty/jelloscript/wiki/GameObject
  */
 export default class GameObject extends Component {
 

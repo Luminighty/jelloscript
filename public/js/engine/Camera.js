@@ -2,6 +2,9 @@ import Component from "./Component";
 import { Vector2 } from "./Struct";
 import { canvasConfig } from "../Config";
 
+/**
+ * @see https://github.com/Luminighty/jelloscript/wiki/Camera
+ */
 export default class Camera extends Component {
 	constructor(isMainCamera = false) {
 		super();

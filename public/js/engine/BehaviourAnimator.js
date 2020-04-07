@@ -1,5 +1,8 @@
 import Animator from "./Animator";
 
+/**
+ * @todo Not implemented yet
+ */
 export default class BehaviourAnimator extends Animator {
 
 	constructor(gameObject, sprite, spriteRect) {

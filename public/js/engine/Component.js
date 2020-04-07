@@ -6,6 +6,9 @@ import { setGameTimeout, clearGameTimeout } from "./Utils";
 
 let currentId = 0;
 
+/**
+ * @see https://github.com/Luminighty/jelloscript/wiki/Component
+ */
 export default class Component {
 
     constructor(gameObject, enabled = true) {

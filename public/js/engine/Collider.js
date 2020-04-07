@@ -6,6 +6,9 @@ import Component from "./Component";
  * @typedef {Collider} Collider
  */
 
+/**
+ * @see https://github.com/Luminighty/jelloscript/wiki/Collider
+ */
 export default class Collider extends Component {
 
 	/**

@@ -1,4 +1,7 @@
 
+/**
+ * @see https://github.com/Luminighty/jelloscript/wiki/Resource
+ */
 export default class Resource {
 
     /**

@@ -3,6 +3,9 @@ import {networkConfig, axisConfig} from "../Input";
 import { Axis, Button } from "./InputManager";
 import EventHandler from "./EventHandler";
 
+/**
+ * @see https://github.com/Luminighty/jelloscript/wiki/Networking
+ */
 const NetworkManager = {
 	/**
 	 * Hosts a lobby

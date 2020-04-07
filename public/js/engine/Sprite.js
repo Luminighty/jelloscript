@@ -1,6 +1,9 @@
 import Resource from "./Resource";
 import { Vector2, Rect } from "./Struct";
 
+/**
+ * @see https://github.com/Luminighty/jelloscript/wiki/Sprite
+ */
 export default class Sprite extends Resource {
         
     /**
