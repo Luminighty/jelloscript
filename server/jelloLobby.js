@@ -33,6 +33,7 @@ function onConnect(socket) {
 	const log = (message, level = 3) => { if (level <= currentLogLevel) console.log(`${addr}: ${message}`); };
 	/** @type {Lobby} */
 	let currentLobby = null;
+	const clientControllers = [];
 	log("connected", 2);
 
 	const updateSocketState = () => {
@@ -55,6 +56,16 @@ function onConnect(socket) {
 			}
 		}
 	};
+
+	socket.on("disconnect", () => {
+		if (currentLobby == null)
+			return;
+		for (const id of clientControllers) {
+			socket.to(currentLobby.roomName).emit("remove controller", id);
+			currentLobby.removeController(id);
+		}
+		socket.leave(currentLobby.roomName);
+	});
 
 	socket.on("host lobby", (lobbyName, options, limit) => {
 		const lobby = new Lobby(socket, lobbyName, options, limit);
@@ -93,8 +104,9 @@ function onConnect(socket) {
 			return;
 		log("Connected a new controller");
 		const contr = new Controller(socket, controller);
+		clientControllers.push(contr.id);
 		currentLobby.addController(contr);
-		socket.to(currentLobby.roomName).emit("new controller", contr.buttons, contr.axes, contr.type, contr.id, controller.data);
+		socket.to(currentLobby.roomName).emit("new controller", contr.buttons, contr.axes, contr.type, contr.id);
 	});
 
 	socket.on("update controller", (id, key, value, isButton) => {
@@ -164,6 +176,10 @@ class Lobby {
 
 	get roomName() {
 		return `${this.id}-${this.lobbyName}`;
+	}
+
+	removeController(id) {
+
 	}
 
 	/** @param {Controller} controller */
